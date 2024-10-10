@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Web", "ContactsManager.Web\ContactsManager.Web.csproj", "{EBE82E0F-0722-400D-8A1E-8DC9CC2ED509}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Tests", "ContactsManager.Tests\ContactsManager.Tests.csproj", "{0994D55F-664E-423F-AE48-F712F8A588DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Core", "ContactsManager.Core\ContactsManager.Core.csproj", "{D330709F-6BD1-4B1E-9FC5-3A7E72EC1C73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Application", "ContactsManager.Application\ContactsManager.Application.csproj", "{C214DB1D-8DEB-45D5-A39E-006482B9FD26}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EBE82E0F-0722-400D-8A1E-8DC9CC2ED509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBE82E0F-0722-400D-8A1E-8DC9CC2ED509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBE82E0F-0722-400D-8A1E-8DC9CC2ED509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBE82E0F-0722-400D-8A1E-8DC9CC2ED509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0994D55F-664E-423F-AE48-F712F8A588DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0994D55F-664E-423F-AE48-F712F8A588DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0994D55F-664E-423F-AE48-F712F8A588DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0994D55F-664E-423F-AE48-F712F8A588DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D330709F-6BD1-4B1E-9FC5-3A7E72EC1C73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D330709F-6BD1-4B1E-9FC5-3A7E72EC1C73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D330709F-6BD1-4B1E-9FC5-3A7E72EC1C73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D330709F-6BD1-4B1E-9FC5-3A7E72EC1C73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
