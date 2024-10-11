@@ -20,4 +20,10 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ContactsManager.Application\ContactsManager.Application.csproj" />
+      <ProjectReference Include="..\ContactsManager.Core\ContactsManager.Core.csproj" />
+      <ProjectReference Include="..\ContactsManager.Web\ContactsManager.Web.csproj" />
+    </ItemGroup>
+
 </Project>
