@@ -42,6 +42,11 @@ public class CountryService : ICountryService
 
     public Country? GetCountryById(Guid countryId)
     {
-        throw new NotImplementedException();
+        if(countryId == Guid.Empty)
+        {
+            throw new ArgumentNullException(nameof(countryId));
+        }
+
+        return _countries.FirstOrDefault(c => c.CountryId == countryId);
     }
 }
