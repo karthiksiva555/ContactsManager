@@ -17,4 +17,11 @@ public interface ICountryService
     /// </summary>
     /// <returns>A list of country objects</returns>
     IList<Country> GetAllCountries();
+
+    /// <summary>
+    /// Receives a guid as input and returns the country object that matches the guid.
+    /// </summary>
+    /// <param name="countryId">The ID of the country object</param>
+    /// <returns>The country object with GUID as CountryId</returns>
+    Country? GetCountryById(Guid countryId);
 }

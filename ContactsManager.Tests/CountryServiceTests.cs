@@ -72,4 +72,46 @@ public class CountryServiceTests
     }
 
     #endregion
+
+    #region GetCountryById
+
+    [Fact]
+    public void GetCountryById_ListIsEmpty_ReturnsNull()
+    {
+        var country = _countryService.GetCountryById(Guid.NewGuid());
+
+        Assert.Null(country);
+    }
+
+    [Fact]
+    public void GetCountryById_InputGuidIsNull_ThrowsArgumentNullException()
+    {
+        _countryService.AddCountry(new Country{ CountryName = "India" });
+
+        Assert.Throws<ArgumentNullException>(() => _countryService.GetCountryById(Guid.Empty));
+    }
+
+    [Fact]
+    public void GetCountryById_NonMatchingCountryId_ReturnsNull()
+    {
+        _countryService.AddCountry(new Country() { CountryName = "India" });
+
+        var country = _countryService.GetCountryById(Guid.NewGuid());
+
+        Assert.Null(country);
+    }
+
+    [Fact]
+    public void GetCountryById_MatchingCountryIdExists_ReturnsCountry()
+    {
+        var countryAdded = _countryService.AddCountry(new Country() {CountryName = "India"});
+
+        var country = _countryService.GetCountryById(countryAdded.CountryId);
+
+        Assert.NotNull(country);
+        Assert.Equal(countryAdded.CountryId, country.CountryId);
+        Assert.Equal(countryAdded.CountryName, country.CountryName);
+    }
+
+    #endregion
 }

@@ -39,4 +39,9 @@ public class CountryService : ICountryService
     {
         return _countries;
     }
+
+    public Country? GetCountryById(Guid countryId)
+    {
+        throw new NotImplementedException();
+    }
 }
