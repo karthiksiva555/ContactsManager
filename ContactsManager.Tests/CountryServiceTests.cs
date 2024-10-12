@@ -8,6 +8,8 @@ public class CountryServiceTests
 {
     private readonly ICountryService _countryService = new CountryService();
 
+    #region AddCountry
+
     [Fact]
     public void AddCountry_NullInput_ThrowsArgumentNullException()
     {
@@ -42,4 +44,32 @@ public class CountryServiceTests
         Assert.NotEqual(Guid.Empty, actual.CountryId);
         Assert.Equal(input.CountryName, actual.CountryName);
     }
+    #endregion
+
+    #region GetAllCountries
+
+    [Fact]
+    public void GetAllCountries_BeforeAddingACountry_ListIsEmpty()
+    {
+        var countries = _countryService.GetAllCountries();
+
+        Assert.Empty(countries);
+    }
+
+    [Fact]
+    public void GetAllCountries_AfterAddingCountries_ReturnsAddedCountries()
+    {
+        var india = new Country { CountryName = "India" };
+        var canada = new Country { CountryName = "Canada" };
+        _countryService.AddCountry(india);
+        _countryService.AddCountry(canada);
+
+        var countries = _countryService.GetAllCountries();
+
+        Assert.Equal(2, countries.Count);
+        Assert.Contains(india, countries);
+        Assert.Contains(canada, countries);
+    }
+
+    #endregion
 }

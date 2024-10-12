@@ -8,6 +8,7 @@ public class CountryService : ICountryService
 {
     private readonly IList<Country> _countries = new List<Country>();
 
+    /// <inheritdoc />
     public Country AddCountry(Country country)
     {
         if (country is null)
@@ -31,5 +32,11 @@ public class CountryService : ICountryService
         _countries.Add(country);
 
         return country;
+    }
+
+    /// <inheritdoc />
+    public IList<Country> GetAllCountries()
+    {
+        return _countries;
     }
 }

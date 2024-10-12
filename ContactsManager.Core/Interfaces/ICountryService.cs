@@ -11,4 +11,10 @@ public interface ICountryService
     /// <param name="country">Country to be created</param>
     /// <returns>The created country object.</returns>
     Country AddCountry(Country country);
+
+    /// <summary>
+    /// Returns all the countries found in the database
+    /// </summary>
+    /// <returns>A list of country objects</returns>
+    IList<Country> GetAllCountries();
 }
