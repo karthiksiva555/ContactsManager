@@ -34,6 +34,15 @@ public class PersonServiceTests
     }
 
     [Fact]
+    public void AddPerson_EmailAddressIsNotValid_ThrowsArgumentException()
+    {
+        PersonAddRequest personToAdd = new() { PersonName = "Test Person", EmailAddress = "test.com"};
+
+        var exception = Assert.Throws<ArgumentException>(() => _personService.AddPerson(personToAdd));
+        Assert.Equal("Email Address must be in valid format.", exception.Message);
+    }
+
+    [Fact]
     public void AddPerson_PersonInputIsValid_ReturnsAddedPerson()
     {
         CountryAddRequest countryToAdd = new() { CountryName = "India" };

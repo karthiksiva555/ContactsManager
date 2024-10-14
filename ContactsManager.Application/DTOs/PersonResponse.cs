@@ -27,7 +27,7 @@ public static class PersonResponseExtensions
 {
     public static PersonResponse ToPersonResponse(this Person person)
     {
-        var age = person.DateOfBirth?.Year - DateTime.UtcNow.Year;
+        var age = person.DateOfBirth.HasValue ? person.DateOfBirth?.Year - DateTime.UtcNow.Year : 0;
         if(person.DateOfBirth?.DayOfYear > DateTime.UtcNow.DayOfYear)
             age--;
         return new PersonResponse() { PersonId = person.PersonId, Age = age, DateOfBirth = person.DateOfBirth, PersonName = person.PersonName, EmailAddress = person.EmailAddress, Gender = person.Gender};

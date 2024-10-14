@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Entities;
@@ -16,24 +17,8 @@ public class PersonService : IPersonService
         _countryService = countryService;
     }
 
-    /// <inheritdoc/>
-    public PersonResponse AddPerson(PersonAddRequest personToAdd)
+    private PersonResponse GetPersonResponse(Person person)
     {
-        if(personToAdd is null)
-        {
-            throw new ArgumentNullException(nameof(personToAdd));
-        }
-
-        if(string.IsNullOrEmpty(personToAdd.PersonName))
-        {
-            throw new ArgumentException(nameof(personToAdd.PersonName));
-        }
-
-        var person = personToAdd.ToPerson();
-        person.PersonId = Guid.NewGuid();
-        
-        _persons.Add(person);
-
         PersonResponse? personResponse = person.ToPersonResponse();
         personResponse.Country = person.CountryId.HasValue ? _countryService.GetCountryById(person.CountryId.Value) : null;
 
@@ -41,10 +26,34 @@ public class PersonService : IPersonService
     }
 
     /// <inheritdoc/>
+    public PersonResponse AddPerson(PersonAddRequest personToAdd)
+    {
+        ArgumentNullException.ThrowIfNull(personToAdd);
+
+        // Model Validation
+        ValidationContext validationContext = new(personToAdd);
+        List<ValidationResult> validationResults = [];
+        var isValid = Validator.TryValidateObject(personToAdd, validationContext, validationResults, true);
+        if(!isValid)
+        {
+            // Get all the error messages
+            var errorMessages = from result in validationResults select result.ErrorMessage;
+            throw new ArgumentException(string.Join(",", errorMessages));
+        }
+
+        var person = personToAdd.ToPerson();
+        person.PersonId = Guid.NewGuid();
+        
+        _persons.Add(person);
+        
+        return GetPersonResponse(person);
+    }
+
+    /// <inheritdoc/>
     public IList<PersonResponse> GetAllPersons()
     {
         List<PersonResponse> persons = [];
-        persons.AddRange(from person in _persons select person.ToPersonResponse());
+        persons.AddRange(from person in _persons select GetPersonResponse(person));
         return persons;
     }
 
@@ -57,6 +66,6 @@ public class PersonService : IPersonService
         }
 
         var person = _persons.FirstOrDefault(p => p.PersonId == personId);
-        return person?.ToPersonResponse();
+        return person!=null ? GetPersonResponse(person) : null;
     }
 }
