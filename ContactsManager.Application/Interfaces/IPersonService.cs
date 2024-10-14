@@ -2,6 +2,9 @@ using ContactsManager.Application.DTOs;
 
 namespace ContactsManager.Application.Interfaces;
 
+/// <summary>
+/// Provides an inteface to perform CRUD operations on the Person entity.
+/// </summary>
 public interface IPersonService
 {
     /// <summary>
