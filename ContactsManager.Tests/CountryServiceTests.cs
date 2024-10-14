@@ -1,6 +1,7 @@
 using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
-using ContactsManager.Core.Interfaces;
+using ContactsManager.Application.Interfaces;
+using ContactsManager.Application.DTOs;
 
 namespace ContactsManager.Tests;
 
@@ -19,7 +20,7 @@ public class CountryServiceTests
     [Fact]
     public void AddCountry_CountryNameEmpty_ThrowsArgumentException()
     {
-        Country input = new () {CountryName = string.Empty};
+        CountryAddRequest input = new () {CountryName = string.Empty};
         
         Assert.Throws<ArgumentException>(() => _countryService.AddCountry(input));
     }
@@ -27,9 +28,9 @@ public class CountryServiceTests
     [Fact]
     public void AddCountry_CountryNameDuplicate_ThrowsArgumentException()
     {
-        Country existingCountry = new() { CountryName = "India" };
+        CountryAddRequest existingCountry = new() { CountryName = "India" };
         _countryService.AddCountry(existingCountry);
-        Country newCountry = new() { CountryName = "India" };
+        CountryAddRequest newCountry = new() { CountryName = "India" };
         
         Assert.Throws<ArgumentException>(() => _countryService.AddCountry(newCountry));
     }
@@ -37,7 +38,7 @@ public class CountryServiceTests
     [Fact]
     public void AddCountry_ValidCountryInput_AddsCountryToDatabase()
     {
-        Country input = new () {CountryName = "India"};
+        CountryAddRequest input = new () {CountryName = "India"};
         
         var actual = _countryService.AddCountry(input);
         
@@ -59,16 +60,15 @@ public class CountryServiceTests
     [Fact]
     public void GetAllCountries_AfterAddingCountries_ReturnsAddedCountries()
     {
-        var india = new Country { CountryName = "India" };
-        var canada = new Country { CountryName = "Canada" };
-        _countryService.AddCountry(india);
-        _countryService.AddCountry(canada);
+        _countryService.AddCountry(new CountryAddRequest() { CountryName = "India" });
+        _countryService.AddCountry(new CountryAddRequest() { CountryName = "Canada" });
 
         var countries = _countryService.GetAllCountries();
 
         Assert.Equal(2, countries.Count);
-        Assert.Contains(india, countries);
-        Assert.Contains(canada, countries);
+        var countryNames = from country in countries select country.CountryName;
+        Assert.Contains("India", countryNames);
+        Assert.Contains("Canada", countryNames);
     }
 
     #endregion
@@ -86,7 +86,7 @@ public class CountryServiceTests
     [Fact]
     public void GetCountryById_InputGuidIsNull_ThrowsArgumentNullException()
     {
-        _countryService.AddCountry(new Country{ CountryName = "India" });
+        _countryService.AddCountry(new CountryAddRequest{ CountryName = "India" });
 
         Assert.Throws<ArgumentNullException>(() => _countryService.GetCountryById(Guid.Empty));
     }
@@ -94,7 +94,7 @@ public class CountryServiceTests
     [Fact]
     public void GetCountryById_NonMatchingCountryId_ReturnsNull()
     {
-        _countryService.AddCountry(new Country() { CountryName = "India" });
+        _countryService.AddCountry(new CountryAddRequest() { CountryName = "India" });
 
         var country = _countryService.GetCountryById(Guid.NewGuid());
 
@@ -104,13 +104,13 @@ public class CountryServiceTests
     [Fact]
     public void GetCountryById_MatchingCountryIdExists_ReturnsCountry()
     {
-        var countryAdded = _countryService.AddCountry(new Country() {CountryName = "India"});
+        var countryAdded = _countryService.AddCountry(new CountryAddRequest() {CountryName = "India"});
 
-        var country = _countryService.GetCountryById(countryAdded.CountryId);
+        var countryResponse = _countryService.GetCountryById(countryAdded.CountryId);
 
-        Assert.NotNull(country);
-        Assert.Equal(countryAdded.CountryId, country.CountryId);
-        Assert.Equal(countryAdded.CountryName, country.CountryName);
+        Assert.NotNull(countryResponse);
+        Assert.Equal(countryAdded.CountryId, countryResponse.CountryId);
+        Assert.Equal(countryAdded.CountryName, countryResponse.CountryName);
     }
 
     #endregion
