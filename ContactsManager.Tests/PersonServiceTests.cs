@@ -1,4 +1,5 @@
 using ContactsManager.Application.DTOs;
+using ContactsManager.Application.Interfaces;
 using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
@@ -7,7 +8,14 @@ namespace ContactsManager.Tests;
 
 public class PersonServiceTests
 {
-    private readonly PersonService _personService = new();
+    private readonly ICountryService _countryService;
+    private readonly PersonService _personService;
+
+    public PersonServiceTests()
+    {
+        _countryService = new CountryService();
+        _personService = new PersonService(_countryService);
+    }
 
     #region AddPerson
 
@@ -28,8 +36,9 @@ public class PersonServiceTests
     [Fact]
     public void AddPerson_PersonInputIsValid_ReturnsAddedPerson()
     {
-        Country india = new() { CountryName = "India", CountryId = Guid.NewGuid() };
-        PersonAddRequest personToAdd = new() { PersonName = "Siva", DateOfBirth = new DateTime(1989, 05, 24), Gender = Gender.Male, EmailAddress = "test@tes.com", CountryId = Guid.NewGuid()};
+        CountryAddRequest countryToAdd = new() { CountryName = "India" };
+        CountryResponse countryResponse = _countryService.AddCountry(countryToAdd);
+        PersonAddRequest personToAdd = new() { PersonName = "Siva", DateOfBirth = new DateTime(1989, 05, 24), Gender = Gender.Male, EmailAddress = "test@tes.com", CountryId = countryResponse.CountryId};
 
         PersonResponse addedPerson = _personService.AddPerson(personToAdd);
 
@@ -38,7 +47,7 @@ public class PersonServiceTests
         var expectedAge = personToAdd.DateOfBirth?.Year - DateTime.Now.Year;
         Assert.Equal(expectedAge, addedPerson.Age);
         Assert.Equal(personToAdd.EmailAddress, addedPerson.EmailAddress);
-        //Assert.Equal(india.CountryName, addedPerson.Country?.CountryName);
+        Assert.Equal(countryResponse.CountryName, addedPerson.Country?.CountryName);
     }
 
     #endregion

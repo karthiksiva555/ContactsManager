@@ -8,10 +8,12 @@ namespace ContactsManager.Application.Services;
 public class PersonService : IPersonService
 {
     private readonly IList<Person> _persons;
+    private readonly ICountryService _countryService;
 
-    public PersonService()
+    public PersonService(ICountryService countryService)
     {
         _persons = [];
+        _countryService = countryService;
     }
 
     /// <inheritdoc/>
@@ -32,7 +34,10 @@ public class PersonService : IPersonService
         
         _persons.Add(person);
 
-        return person.ToPersonResponse();
+        PersonResponse? personResponse = person.ToPersonResponse();
+        personResponse.Country = person.CountryId.HasValue ? _countryService.GetCountryById(person.CountryId.Value) : null;
+
+        return personResponse;
     }
 
     /// <inheritdoc/>

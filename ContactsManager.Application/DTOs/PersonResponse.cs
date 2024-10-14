@@ -30,6 +30,6 @@ public static class PersonResponseExtensions
         var age = person.DateOfBirth?.Year - DateTime.UtcNow.Year;
         if(person.DateOfBirth?.DayOfYear > DateTime.UtcNow.DayOfYear)
             age--;
-        return new PersonResponse() { PersonId = person.PersonId, Age = age, Country = new CountryResponse(){CountryId = person.CountryId ?? Guid.Empty}, DateOfBirth = person.DateOfBirth, PersonName = person.PersonName, EmailAddress = person.EmailAddress, Gender = person.Gender};
+        return new PersonResponse() { PersonId = person.PersonId, Age = age, DateOfBirth = person.DateOfBirth, PersonName = person.PersonName, EmailAddress = person.EmailAddress, Gender = person.Gender};
     }
 }
