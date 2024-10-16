@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using ContactsManager.Application.DTOs;
+using ContactsManager.Application.Helpers;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Entities;
 
@@ -30,16 +30,8 @@ public class PersonService : IPersonService
     {
         ArgumentNullException.ThrowIfNull(personToAdd);
 
-        // Model Validation
-        ValidationContext validationContext = new(personToAdd);
-        List<ValidationResult> validationResults = [];
-        var isValid = Validator.TryValidateObject(personToAdd, validationContext, validationResults, true);
-        if(!isValid)
-        {
-            // Get all the error messages
-            var errorMessages = from result in validationResults select result.ErrorMessage;
-            throw new ArgumentException(string.Join(",", errorMessages));
-        }
+        // Model Validation; returns void if object is valid; throws an exception otherwise
+        ValidationHelper.Validate(personToAdd);
 
         var person = personToAdd.ToPerson();
         person.PersonId = Guid.NewGuid();
