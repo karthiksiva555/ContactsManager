@@ -26,4 +26,12 @@ public interface IPersonService
     /// <param name="personId">The Id of the person to be searched for.</param>
     /// <returns>The matched person if found, null otherwise</returns>
     PersonResponse? GetPersonById(Guid personId);
+    
+    /// <summary>
+    /// Returns all the person objects that matches the give search string in the searchBy field.
+    /// </summary>
+    /// <param name="searchBy">The field to search.</param>
+    /// <param name="searchString">The string to search with.</param>
+    /// <returns>The person records matching the search criteria</returns>
+    IList<PersonResponse> GetFilteredPersons(string searchBy, string? searchString);
 }

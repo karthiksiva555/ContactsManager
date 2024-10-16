@@ -60,4 +60,9 @@ public class PersonService : IPersonService
         var person = _persons.FirstOrDefault(p => p.PersonId == personId);
         return person!=null ? GetPersonResponse(person) : null;
     }
+
+    public IList<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
+    {
+        throw new NotImplementedException();
+    }
 }
