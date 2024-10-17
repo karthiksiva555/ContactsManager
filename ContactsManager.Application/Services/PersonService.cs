@@ -25,6 +25,14 @@ public class PersonService : IPersonService
         return personResponse;
     }
 
+    private static bool PropertyContainsSearchString(string propertyName, PersonResponse person, string searchString)
+    {
+        var personType = person.GetType();
+        var property = personType.GetProperty(propertyName);
+        var propertyValue = property?.GetValue(person)?.ToString();
+        return propertyValue?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false;
+    }
+    
     /// <inheritdoc/>
     public PersonResponse AddPerson(PersonAddRequest personToAdd)
     {
@@ -61,8 +69,28 @@ public class PersonService : IPersonService
         return person!=null ? GetPersonResponse(person) : null;
     }
 
+    /// <inheritdoc/>
     public IList<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
     {
-        throw new NotImplementedException();
+        if (string.IsNullOrEmpty(searchBy))
+        {
+            throw new ArgumentException("Invalid argument supplied.", nameof(searchBy));
+        }
+        
+        // check if searchBy is a valid property in Person object
+        var personType = typeof(Person);
+        var property = personType.GetProperty(searchBy);
+        if (property == null)
+        {
+            throw new ArgumentException("Invalid argument supplied.", nameof(searchBy));
+        }
+
+        if (string.IsNullOrEmpty(searchString))
+        {
+            return GetAllPersons();
+        }
+        
+        var allPersons = GetAllPersons();
+        return allPersons.Where(person => PropertyContainsSearchString(searchBy, person, searchString)).ToList();
     }
 }

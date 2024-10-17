@@ -151,7 +151,7 @@ public class PersonServiceTests
     [InlineData("InvalidPropertyName")]
     public void GetFilteredPersons_InvalidSearchByValue_ThrowsArgumentException(string searchBy)
     {
-        Assert.Throws<ArgumentNullException>(() => _personService.GetFilteredPersons(searchBy, "any"));
+        Assert.Throws<ArgumentException>(() => _personService.GetFilteredPersons(searchBy, "any"));
     }
 
     [Fact]
@@ -174,8 +174,8 @@ public class PersonServiceTests
         
         Assert.Equal(3, filteredPersons.Count);
         var personNames = GetPersonNames(filteredPersons);
-        Assert.Contains("Rahim", personNames);
         Assert.Contains("Ram", personNames);
+        Assert.Contains("rahim", personNames);
         Assert.Contains("Robert", personNames);
     }
 
