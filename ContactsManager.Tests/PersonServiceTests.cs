@@ -211,7 +211,9 @@ public class PersonServiceTests
     [InlineData("InvalidPropertyName")]
     public void GetSortedPersons_InvalidSortByValue_ThrowsArgumentException(string sortBy)
     {
-        List<PersonResponse> persons = [];
+        List<PersonResponse> persons = [
+            new() { PersonName = "Hanuman"}
+        ];
         
         Assert.Throws<ArgumentException>(() => _personService.GetSortedPersons(persons, sortBy, SortOrder.Asc));
     }

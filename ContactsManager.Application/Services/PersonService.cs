@@ -1,3 +1,4 @@
+using System.Reflection;
 using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Helpers;
 using ContactsManager.Application.Interfaces;
@@ -99,6 +100,22 @@ public class PersonService : IPersonService
     /// <inheritdoc/>
     public IList<PersonResponse> GetSortedPersons(IList<PersonResponse> allPersons, string sortBy, SortOrder sortOrder)
     {
-        throw new NotImplementedException();
+        if (allPersons.Count == 0)
+        {
+            return allPersons;
+        }
+
+        if (string.IsNullOrEmpty(sortBy) || !PropertyOfPerson(sortBy))
+        {
+            throw new ArgumentException("Invalid argument supplied.", nameof(sortBy));
+        }
+
+        var property = typeof(PersonResponse).GetProperty(sortBy, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+        Func<PersonResponse, object> keySelector = p => property!.GetValue(p, null)!;
+        var sortedPersons = sortOrder == SortOrder.Desc
+            ? allPersons.OrderByDescending(keySelector).ToList()
+            : allPersons.OrderBy(keySelector).ToList();
+
+        return sortedPersons;
     }
 }
