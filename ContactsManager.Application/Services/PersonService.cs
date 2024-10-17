@@ -119,9 +119,32 @@ public class PersonService : IPersonService
         return sortedPersons;
     }
 
+    /// <exception cref="ArgumentException"></exception>
     /// <inheritdoc/>
     public PersonResponse UpdatePerson(PersonUpdateRequest personToUpdate)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(personToUpdate);
+
+        if (personToUpdate.PersonId == Guid.Empty)
+        {
+            throw new ArgumentException("Person Id cannot be blank", nameof(personToUpdate.PersonId));
+        }
+
+        // Perform all model validations
+        ValidationHelper.Validate(personToUpdate);
+        
+        var existingPerson = _persons.FirstOrDefault(p => p.PersonId == personToUpdate.PersonId);
+        if (existingPerson == null)
+        {
+            throw new ArgumentException("Invalid argument supplied", nameof(personToUpdate.PersonId));
+        }
+        
+        existingPerson.PersonName = personToUpdate.PersonName;
+        existingPerson.CountryId = personToUpdate.CountryId;
+        existingPerson.EmailAddress = personToUpdate.EmailAddress;
+        existingPerson.Gender = personToUpdate.Gender;
+        existingPerson.DateOfBirth = personToUpdate.DateOfBirth;
+
+        return existingPerson.ToPersonResponse();
     }
 }

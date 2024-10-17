@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
 
 namespace ContactsManager.Application.DTOs;
@@ -9,7 +10,7 @@ namespace ContactsManager.Application.DTOs;
 public class PersonUpdateRequest
 {
     [Required(ErrorMessage = "Person Id cannot be blank")]
-    public Guid PersonId { get; set; }
+    public Guid PersonId { get; set; } = Guid.Empty;
 
     [Required]
     public string PersonName { get; set; } = string.Empty;
@@ -22,4 +23,12 @@ public class PersonUpdateRequest
     public string? EmailAddress { get; set; }
 
     public Guid? CountryId { get; set; }
+}
+
+public static class PersonUpdateRequestExtensions
+{
+    public static Person ToPerson(this PersonUpdateRequest personUpdateRequest)
+    {
+        return new Person { PersonId = personUpdateRequest.PersonId, PersonName = personUpdateRequest.PersonName, EmailAddress = personUpdateRequest.EmailAddress, DateOfBirth = personUpdateRequest.DateOfBirth, Gender = personUpdateRequest.Gender, CountryId = personUpdateRequest.CountryId };
+    }
 }

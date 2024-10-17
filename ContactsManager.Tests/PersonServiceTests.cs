@@ -277,9 +277,10 @@ public class PersonServiceTests
     {
         _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 1" });
         _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 2" });
-        var personToUpdate = new PersonUpdateRequest() { PersonId = Guid.NewGuid()};
+        var personToUpdate = new PersonUpdateRequest() { PersonId = Guid.NewGuid(), PersonName = "Update Test"};
 
-        Assert.Throws<ArgumentException>(() => _personService.UpdatePerson(personToUpdate));
+        var exception = Assert.Throws<ArgumentException>(() => _personService.UpdatePerson(personToUpdate));
+        Assert.Equal("Invalid argument supplied (Parameter \'PersonId\')", exception.Message);
     }
 
     [Fact]
