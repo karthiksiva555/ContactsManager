@@ -147,4 +147,16 @@ public class PersonService : IPersonService
 
         return existingPerson.ToPersonResponse();
     }
+
+    /// <inheritdoc/>
+    public bool DeletePerson(Guid personId)
+    {
+        if (personId == Guid.Empty)
+        {
+            throw new ArgumentException("Invalid argument supplied", nameof(personId));
+        }
+        
+        var existingPerson = _persons.FirstOrDefault(p => p.PersonId == personId);
+        return existingPerson != null && _persons.Remove(existingPerson);
+    }
 }

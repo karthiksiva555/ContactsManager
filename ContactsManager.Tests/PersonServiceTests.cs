@@ -299,4 +299,36 @@ public class PersonServiceTests
     }
     
     #endregion
+
+    #region DeletePerson
+
+    [Fact]
+    public void DeletePerson_PersonIdIsInvalid_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _personService.DeletePerson(Guid.Empty));
+    }
+
+    [Fact]
+    public void DeletePerson_PersonIdDoesNotExistInList_ReturnsFalse()
+    {
+        _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 1" });
+        
+        var result = _personService.DeletePerson(Guid.NewGuid());
+        
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void DeletePerson_PersonIdExistsInTheList_DeletesPersonAndReturnsTrue()
+    {
+        var person1 = _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 1" });
+        
+        var result = _personService.DeletePerson(person1.PersonId);
+        
+        Assert.True(result);
+        var person = _personService.GetPersonById(person1.PersonId);
+        Assert.Null(person);
+    }
+    
+    #endregion
 }
