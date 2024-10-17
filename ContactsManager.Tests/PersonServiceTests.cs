@@ -1,8 +1,5 @@
-using System.Runtime.InteropServices;
 using ContactsManager.Application.DTOs;
-using ContactsManager.Application.Interfaces;
 using ContactsManager.Application.Services;
-using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
 using Xunit.Abstractions;
 
@@ -10,7 +7,7 @@ namespace ContactsManager.Tests;
 
 public class PersonServiceTests
 {
-    private readonly ICountryService _countryService;
+    private readonly CountryService _countryService;
     private readonly PersonService _personService;
     private readonly ITestOutputHelper _testOutputHelper;
 
@@ -23,7 +20,7 @@ public class PersonServiceTests
 
     #region Private Methods
 
-    private string[] GetPersonNames(IList<PersonResponse> persons)
+    private static string[] GetPersonNames(IList<PersonResponse> persons)
     {
         var personNames = from person in persons select person.PersonName;
         return personNames as string[] ?? personNames.ToArray();
@@ -192,6 +189,67 @@ public class PersonServiceTests
         var personNames = GetPersonNames(filteredPersons);
         Assert.Contains("rahim", personNames);
         Assert.Contains("Ram", personNames);
+    }
+    
+    #endregion
+
+    #region GetSortedPersons
+
+    [Fact]
+    public void GetSortedPersons_EmptyPersonsList_ReturnsEmptyList()
+    {
+        List<PersonResponse> persons = [];
+
+        var sortedPersons = _personService.GetSortedPersons(persons, "PersonName", SortOrder.Asc);
+        
+        Assert.Empty(sortedPersons);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("InvalidPropertyName")]
+    public void GetSortedPersons_InvalidSortByValue_ThrowsArgumentException(string sortBy)
+    {
+        List<PersonResponse> persons = [];
+        
+        Assert.Throws<ArgumentException>(() => _personService.GetSortedPersons(persons, sortBy, SortOrder.Asc));
+    }
+
+    [Fact]
+    public void GetSortedPersons_SortByPersonNameAscending_ReturnsSortedPersons()
+    {
+        List<PersonResponse> persons =
+        [
+            new() { PersonName = "Rama", Age = 25 },
+            new() { PersonName = "Seetha", Age = 30 },
+            new() { PersonName = "Lakshmana", Age = 22 }
+        ];
+        
+        var sortedPersons = _personService.GetSortedPersons(persons, "PersonName", SortOrder.Asc);
+        
+        Assert.Equal(3, sortedPersons.Count);
+        Assert.Equal("Lakshmana", sortedPersons[0].PersonName);
+        Assert.Equal("Rama", sortedPersons[1].PersonName);
+        Assert.Equal("Seetha", sortedPersons[2].PersonName);
+    }
+    
+    [Fact]
+    public void GetSortedPersons_SortByPersonNameDescending_ReturnsSortedPersons()
+    {
+        List<PersonResponse> persons =
+        [
+            new() { PersonName = "Rama", Age = 25 },
+            new() { PersonName = "Seetha", Age = 30 },
+            new() { PersonName = "Lakshmana", Age = 22 }
+        ];
+        
+        var sortedPersons = _personService.GetSortedPersons(persons, "PersonName", SortOrder.Desc);
+        
+        Assert.Equal(3, sortedPersons.Count);
+        Assert.Equal("Seetha", sortedPersons[0].PersonName);
+        Assert.Equal("Rama", sortedPersons[1].PersonName);
+        Assert.Equal("Lakshmana", sortedPersons[2].PersonName);
     }
     
     #endregion

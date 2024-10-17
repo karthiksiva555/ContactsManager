@@ -2,6 +2,7 @@ using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Helpers;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Entities;
+using ContactsManager.Core.Enums;
 
 namespace ContactsManager.Application.Services;
 
@@ -31,6 +32,13 @@ public class PersonService : IPersonService
         var property = personType.GetProperty(propertyName);
         var propertyValue = property?.GetValue(person)?.ToString();
         return propertyValue?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false;
+    }
+
+    private static bool PropertyOfPerson(string propertyName)
+    {
+        var personType = typeof(Person);
+        var property = personType.GetProperty(propertyName);
+        return property != null;
     }
     
     /// <inheritdoc/>
@@ -72,19 +80,13 @@ public class PersonService : IPersonService
     /// <inheritdoc/>
     public IList<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
     {
-        if (string.IsNullOrEmpty(searchBy))
+        // If searchBy is null, empty or not a property of Person class, throw exception
+        if (string.IsNullOrEmpty(searchBy) || !PropertyOfPerson(searchBy))
         {
             throw new ArgumentException("Invalid argument supplied.", nameof(searchBy));
         }
         
-        // check if searchBy is a valid property in Person object
-        var personType = typeof(Person);
-        var property = personType.GetProperty(searchBy);
-        if (property == null)
-        {
-            throw new ArgumentException("Invalid argument supplied.", nameof(searchBy));
-        }
-
+        // If search string is empty, return all records as result
         if (string.IsNullOrEmpty(searchString))
         {
             return GetAllPersons();
@@ -92,5 +94,11 @@ public class PersonService : IPersonService
         
         var allPersons = GetAllPersons();
         return allPersons.Where(person => PropertyContainsSearchString(searchBy, person, searchString)).ToList();
+    }
+
+    /// <inheritdoc/>
+    public IList<PersonResponse> GetSortedPersons(IList<PersonResponse> allPersons, string sortBy, SortOrder sortOrder)
+    {
+        throw new NotImplementedException();
     }
 }
