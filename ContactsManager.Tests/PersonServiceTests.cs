@@ -255,4 +255,47 @@ public class PersonServiceTests
     }
     
     #endregion
+
+    #region UpdatePerson
+
+    [Fact]
+    public void UpdatePerson_PersonUpdateRequestIsNull_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => _personService.UpdatePerson(null!));
+    }
+
+    [Fact]
+    public void UpdatePerson_PersonIdIsNull_ThrowsArgumentException()
+    {
+        PersonUpdateRequest personUpdateRequest = new() { PersonName = "Test" };
+        
+        Assert.Throws<ArgumentException>(() => _personService.UpdatePerson(personUpdateRequest));
+    }
+
+    [Fact]
+    public void UpdatePerson_PersonIdDoesNotExist_ThrowsArgumentException()
+    {
+        _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 1" });
+        _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 2" });
+        var personToUpdate = new PersonUpdateRequest() { PersonId = Guid.NewGuid()};
+
+        Assert.Throws<ArgumentException>(() => _personService.UpdatePerson(personToUpdate));
+    }
+
+    [Fact]
+    public void UpdatePerson_ValidPersonUpdateRequest_PersonIsUpdated()
+    {
+        var person1 = _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 1" });
+        _personService.AddPerson(new PersonAddRequest() { PersonName = "Test 2" });
+        var personToUpdate = new PersonUpdateRequest() { PersonId = person1.PersonId, PersonName = "Updated Name"};
+        
+        var updatedPerson = _personService.UpdatePerson(personToUpdate);
+        
+        Assert.Equal(personToUpdate.PersonName, updatedPerson.PersonName);
+        var person = _personService.GetPersonById(person1.PersonId);
+        Assert.NotNull(person);
+        Assert.Equal(personToUpdate.PersonName, person.PersonName);
+    }
+    
+    #endregion
 }

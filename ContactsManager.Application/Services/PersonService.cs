@@ -118,4 +118,10 @@ public class PersonService : IPersonService
 
         return sortedPersons;
     }
+
+    /// <inheritdoc/>
+    public PersonResponse UpdatePerson(PersonUpdateRequest personToUpdate)
+    {
+        throw new NotImplementedException();
+    }
 }

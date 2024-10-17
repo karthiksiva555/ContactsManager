@@ -44,4 +44,11 @@ public interface IPersonService
     /// <param name="sortOrder">The sort order option Asc for Ascending or Desc for Descending</param>
     /// <returns>The sorted list of persons</returns>
     IList<PersonResponse> GetSortedPersons(IList<PersonResponse> allPersons, string sortBy, SortOrder sortOrder);
+    
+    /// <summary>
+    /// Updates a person record
+    /// </summary>
+    /// <param name="personToUpdate">The updated person information along with the person id.</param>
+    /// <returns>The updated person record</returns>
+    PersonResponse UpdatePerson(PersonUpdateRequest personToUpdate);
 }
