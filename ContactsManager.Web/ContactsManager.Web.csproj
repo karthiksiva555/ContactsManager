@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-      <Folder Include="Views\" />
+      <ProjectReference Include="..\ContactsManager.Application\ContactsManager.Application.csproj" />
+      <ProjectReference Include="..\ContactsManager.Core\ContactsManager.Core.csproj" />
     </ItemGroup>
 
 </Project>
