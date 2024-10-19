@@ -1,7 +1,7 @@
 @if (ViewBag.SortBy == ViewBag.ColumnName && ViewBag.SortOrder == SortOrder.Asc.ToString())
 {
     <th>
-        <a href="~/persons/index?searchBy=@ViewBag.SearchBy&searchString=@ViewBag.SearchString&sortBy=@ViewBag.SortBy&sortOrder=@nameof(SortOrder.Asc)">
+        <a href="~/person/index?searchBy=@ViewBag.SearchBy&searchString=@ViewBag.SearchString&sortBy=@ViewBag.ColumnName&sortOrder=@nameof(SortOrder.Asc)">
             @ViewBag.DisplayName
         </a>
         <i class="fa-solid fa-sort-up"></i>
@@ -10,7 +10,7 @@
 else if (ViewBag.SortBy == ViewBag.ColumnName && ViewBag.SortOrder == SortOrder.Desc.ToString())
 {
     <th>
-        <a href="~/persons/index?searchBy=@ViewBag.SearchBy&searchString=@ViewBag.SearchString&sortBy=@ViewBag.SortBy&sortOrder=@nameof(SortOrder.Desc)">
+        <a href="~/person/index?searchBy=@ViewBag.SearchBy&searchString=@ViewBag.SearchString&sortBy=@ViewBag.ColumnName&sortOrder=@nameof(SortOrder.Desc)">
             @ViewBag.DisplayName
         </a>
         <i class="fa-solid fa-sort-down"></i>
@@ -19,7 +19,7 @@ else if (ViewBag.SortBy == ViewBag.ColumnName && ViewBag.SortOrder == SortOrder.
 else
 {
     <th>
-        <a href="~/persons/index?searchBy=@ViewBag.SearchBy&searchString=@ViewBag.SearchString&sortBy=@ViewBag.SortBy&sortOrder=@nameof(SortOrder.Asc)">
+        <a href="~/person/index?searchBy=@ViewBag.SearchBy&searchString=@ViewBag.SearchString&sortBy=@ViewBag.ColumnName&sortOrder=@nameof(SortOrder.Asc)">
             @ViewBag.DisplayName
         </a>
     </th>

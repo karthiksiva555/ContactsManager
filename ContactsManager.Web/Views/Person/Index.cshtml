@@ -4,6 +4,8 @@
 }
 
 <h2>Persons</h2>
+<a href="~/person/create">Create Person</a>
+
 <form action="~/person/index" method="get">
     <div class="box flex">
         <div class="flex-1">
@@ -48,8 +50,8 @@
 
         @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
         {
-            { "ColumnName", nameof(PersonResponse.Age) },
-            { "DisplayName", "Age" }
+            { "ColumnName", nameof(PersonResponse.DateOfBirth) },
+            { "DisplayName", "Date of Birth" }
         })
 
         @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
@@ -71,7 +73,7 @@
             <tr>
                 <td>@person.PersonName</td>
                 <td>@person.EmailAddress</td>
-                <td>@person.Age</td>
+                <td>@person.DateOfBirth</td>
                 <td>@person.Gender</td>
                 <td>@person.Country</td>
             </tr>

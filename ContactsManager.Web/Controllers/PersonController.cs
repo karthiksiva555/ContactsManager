@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContactsManager.Web.Controllers;
 
 [Route("[controller]")]
-public class PersonController(IPersonService personService) : Controller
+public class PersonController(IPersonService personService, ICountryService countryService) : Controller
 {
     [Route("index")]
     [Route("/")]
@@ -35,5 +35,30 @@ public class PersonController(IPersonService personService) : Controller
         var sortedPersons = personService.GetSortedPersons(filteredPersons, sortBy, sortOrder);
         
         return View(sortedPersons);
+    }
+
+    [Route("create")]
+    [HttpGet]
+    public IActionResult Create()
+    {
+        var countries = countryService.GetAllCountries();
+        ViewBag.Countries = countries;
+        return View();        
+    }
+
+    [Route("create")]
+    [HttpPost]
+    public IActionResult Create(PersonAddRequest personTAdd)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Countries = countryService.GetAllCountries();
+            ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            
+            return View();
+        }
+
+        personService.AddPerson(personTAdd);
+        return RedirectToAction("Index", "Person");
     }
 }

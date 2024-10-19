@@ -22,7 +22,8 @@ public class PersonService : IPersonService
     private PersonResponse GetPersonResponse(Person person)
     {
         PersonResponse? personResponse = person.ToPersonResponse();
-        personResponse.Country = person.CountryId.HasValue ? _countryService.GetCountryById(person.CountryId.Value) : null;
+        var country = person.CountryId.HasValue ? _countryService.GetCountryById(person.CountryId.Value) : null;
+        personResponse.Country = country?.CountryName ?? string.Empty;
 
         return personResponse;
     }
