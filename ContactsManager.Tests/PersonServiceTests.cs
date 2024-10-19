@@ -56,7 +56,7 @@ public class PersonServiceTests
     [Fact]
     public void AddPerson_PersonInputIsValid_ReturnsAddedPerson()
     {
-        CountryAddRequest countryToAdd = new() { CountryName = "India" };
+        CountryAddRequest countryToAdd = new() { CountryName = "Test Country" };
         CountryResponse countryResponse = _countryService.AddCountry(countryToAdd);
         PersonAddRequest personToAdd = new() { PersonName = "Siva", DateOfBirth = new DateTime(1989, 05, 24), Gender = Gender.Male, EmailAddress = "test@tes.com", CountryId = countryResponse.CountryId};
 
@@ -65,11 +65,11 @@ public class PersonServiceTests
 
         Assert.NotEqual(Guid.Empty, addedPerson.PersonId);
         Assert.Equal(personToAdd.PersonName, addedPerson.PersonName);
-        var expectedAge = personToAdd.DateOfBirth?.Year - DateTime.Now.Year;
+        var expectedAge = DateTime.Now.Year - personToAdd.DateOfBirth?.Year;
         _testOutputHelper.WriteLine($"Verifying the age property is calculated correctly");
         Assert.Equal(expectedAge, addedPerson.Age);
         Assert.Equal(personToAdd.EmailAddress, addedPerson.EmailAddress);
-        Assert.Equal(countryResponse.CountryName, addedPerson.Country?.CountryName);
+        Assert.Equal(countryResponse.CountryName, addedPerson.Country);
     }
 
     #endregion

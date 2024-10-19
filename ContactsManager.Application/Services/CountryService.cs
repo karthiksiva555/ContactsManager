@@ -7,13 +7,22 @@ namespace ContactsManager.Application.Services;
 /// <inheritdoc />
 public class CountryService : ICountryService
 {
-    private readonly IList<Country> _countries = [
-        new() { CountryId = Guid.NewGuid() ,CountryName = "India"},
-        new() { CountryId = Guid.NewGuid() ,CountryName = "Australia"},
-        new() { CountryId = Guid.NewGuid() ,CountryName = "Canada"},
-        new() { CountryId = Guid.NewGuid() ,CountryName = "USA"},
-        new() { CountryId = Guid.NewGuid() ,CountryName = "UK"},
-    ];
+    private readonly IList<Country> _countries = [];
+
+    public CountryService(bool seedCountries=true)
+    {
+        if (seedCountries)
+        {
+            _countries =
+            [
+                new Country { CountryId = Guid.NewGuid(), CountryName = "India" },
+                new Country { CountryId = Guid.NewGuid(), CountryName = "Australia" },
+                new Country { CountryId = Guid.NewGuid(), CountryName = "Canada" },
+                new Country { CountryId = Guid.NewGuid(), CountryName = "USA" },
+                new Country { CountryId = Guid.NewGuid(), CountryName = "UK" }
+            ];
+        }
+    }
 
     /// <inheritdoc />
     public CountryResponse AddCountry(CountryAddRequest countryToAdd)
