@@ -4,15 +4,65 @@
 }
 
 <h2>Persons</h2>
+<form action="~/person/index" method="get">
+    <div class="box flex">
+        <div class="flex-1">
+            <select class="form-input" name="searchBy">
+                @foreach (KeyValuePair<string, string> field in ViewBag.SearchFields)
+                {
+                    if (ViewBag.SearchBy == field.Key)
+                    {
+                        <option value="@field.Key" selected>@field.Value</option>
+                        continue;
+                    }
+                    <option value="@field.Key">@field.Value</option>
+                }
+            </select>
+        </div>
+        <div class="flex-1">
+            <input type="search" class="form-input" id="search" placeholder="Search" name="searchString" value="@ViewBag.SearchString"/>
+        </div>
+        <div class="flex-1">
+            <button class="button button-blue-back">
+                Search
+            </button>
+            <a href="~/person/index" class="link-hover">Clear all</a>
+        </div>
+    </div>
+</form>
 
 <table class="table w-100 mt">
     <thead>
     <tr>
-        <th>Person Name</th>
-        <th>Email</th>
-        <th>Age</th>
-        <th>Gender</th>
-        <th>Country</th>
+        @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
+        {
+            { "ColumnName", nameof(PersonResponse.PersonName) },
+            { "DisplayName", "Person Name" }
+        })
+
+        @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
+        {
+            { "ColumnName", nameof(PersonResponse.EmailAddress) },
+            { "DisplayName", "Email Address" }
+        })
+
+        @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
+        {
+            { "ColumnName", nameof(PersonResponse.Age) },
+            { "DisplayName", "Age" }
+        })
+
+        @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
+        {
+            { "ColumnName", nameof(PersonResponse.Gender) },
+            { "DisplayName", "Gender" }
+        })
+
+        @await Html.PartialAsync("_GridColumnHeader", new ViewDataDictionary(ViewData)
+        {
+            { "ColumnName", nameof(PersonResponse.Country) },
+            { "DisplayName", "Country Name" }
+        })
     </tr>
     </thead>
     <tbody>
