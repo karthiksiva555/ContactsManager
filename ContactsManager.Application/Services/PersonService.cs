@@ -13,12 +13,27 @@ public class PersonService : IPersonService
     private readonly IList<Person> _persons;
     private readonly ICountryService _countryService;
 
-    public PersonService(ICountryService countryService)
+    public PersonService(ICountryService countryService, bool seedData = true)
     {
-        _persons = [];
         _countryService = countryService;
+        _persons = GetPersonSeed(seedData);
     }
 
+    private List<Person> GetPersonSeed(bool seedData)
+    {
+        if (!seedData)
+            return [];
+        var countries = _countryService.GetAllCountries();
+        return
+        [
+            new Person
+            {
+                PersonId = Guid.NewGuid(), PersonName = "Siva", EmailAddress = "test@test.com",
+                DateOfBirth = DateTime.Today.AddYears(-20), Gender = Gender.Male, CountryId = countries[0].CountryId
+            }
+        ];
+    }
+    
     private PersonResponse GetPersonResponse(Person person)
     {
         PersonResponse? personResponse = person.ToPersonResponse();
@@ -143,7 +158,7 @@ public class PersonService : IPersonService
         existingPerson.PersonName = personToUpdate.PersonName;
         existingPerson.CountryId = personToUpdate.CountryId;
         existingPerson.EmailAddress = personToUpdate.EmailAddress;
-        existingPerson.Gender = personToUpdate.Gender;
+        existingPerson.Gender = Enum.Parse<Gender>(personToUpdate.Gender);
         existingPerson.DateOfBirth = personToUpdate.DateOfBirth;
 
         return existingPerson.ToPersonResponse();

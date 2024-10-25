@@ -2,12 +2,19 @@ using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ContactsManager.Web.Controllers;
 
 [Route("[controller]")]
 public class PersonController(IPersonService personService, ICountryService countryService) : Controller
 {
+    private IEnumerable<SelectListItem> GetCountriesForDropdown()
+    {
+        var countries = countryService.GetAllCountries();
+        return countries.Select(country => new SelectListItem(country.CountryName, country.CountryId.ToString()));
+    }
+    
     [Route("index")]
     [Route("/")]
     public IActionResult Index(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
@@ -41,8 +48,7 @@ public class PersonController(IPersonService personService, ICountryService coun
     [HttpGet]
     public IActionResult Create()
     {
-        var countries = countryService.GetAllCountries();
-        ViewBag.Countries = countries;
+        ViewBag.Countries = GetCountriesForDropdown();
         return View();        
     }
 
@@ -52,13 +58,49 @@ public class PersonController(IPersonService personService, ICountryService coun
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.Countries = countryService.GetAllCountries();
+            ViewBag.Countries = GetCountriesForDropdown();
             ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             
             return View();
         }
 
         personService.AddPerson(personTAdd);
+        return RedirectToAction("Index", "Person");
+    }
+
+    [Route("[action]/{personId:guid}")]
+    [HttpGet]
+    public IActionResult Edit(Guid personId)
+    {
+        var person = personService.GetPersonById(personId);
+        if (person == null)
+        {
+            return RedirectToAction("Index", "Person");
+        }
+        ViewBag.Countries = GetCountriesForDropdown();
+        return View(person.ToPersonUpdateRequest());
+    }
+
+    // This route parameter is required even though the action method parameter is different
+    [Route("[action]/{personId:guid}")]
+    [HttpPost]
+    public IActionResult Edit(PersonUpdateRequest personUpdateRequest)
+    {
+        var personResponse = personService.GetPersonById(personUpdateRequest.PersonId);
+        if (personResponse == null)
+        {
+            return RedirectToAction("Index", "Person");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Countries = GetCountriesForDropdown();
+            ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            
+            return View();
+        }
+        
+        personService.UpdatePerson(personUpdateRequest);
         return RedirectToAction("Index", "Person");
     }
 }

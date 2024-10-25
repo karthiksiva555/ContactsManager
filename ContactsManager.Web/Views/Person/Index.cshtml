@@ -28,7 +28,7 @@
             <button class="button button-blue-back">
                 Search
             </button>
-            <a href="~/person/index" class="link-hover">Clear all</a>
+            <a asp-controller="Person" asp-action="Index" class="link-hover">Clear all</a>
         </div>
     </div>
 </form>
@@ -76,6 +76,9 @@
                 <td>@person.DateOfBirth</td>
                 <td>@person.Gender</td>
                 <td>@person.Country</td>
+                <td>
+                    <a asp-controller="Person" asp-action="Edit" asp-route-personId="@person.PersonId">Edit</a>
+                </td>
             </tr>
         }
     </tbody>

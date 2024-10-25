@@ -17,18 +17,20 @@ public class PersonUpdateRequest
 
     public DateTime? DateOfBirth { get; set; }
 
-    public Gender? Gender { get; set; }
+    public string? Gender { get; set; }
 
     [EmailAddress(ErrorMessage = "Email Address must be in valid format.")]
     public string? EmailAddress { get; set; }
 
     public Guid? CountryId { get; set; }
+    
+    public string? Country { get; set; }
 }
 
 public static class PersonUpdateRequestExtensions
 {
     public static Person ToPerson(this PersonUpdateRequest personUpdateRequest)
     {
-        return new Person { PersonId = personUpdateRequest.PersonId, PersonName = personUpdateRequest.PersonName, EmailAddress = personUpdateRequest.EmailAddress, DateOfBirth = personUpdateRequest.DateOfBirth, Gender = personUpdateRequest.Gender, CountryId = personUpdateRequest.CountryId };
+        return new Person { PersonId = personUpdateRequest.PersonId, PersonName = personUpdateRequest.PersonName, EmailAddress = personUpdateRequest.EmailAddress, DateOfBirth = personUpdateRequest.DateOfBirth, Gender = Enum.Parse<Gender>(personUpdateRequest.Gender), CountryId = personUpdateRequest.CountryId };
     }
 }
