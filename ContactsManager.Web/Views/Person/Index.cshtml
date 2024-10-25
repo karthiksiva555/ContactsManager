@@ -79,6 +79,10 @@
                 <td>
                     <a asp-controller="Person" asp-action="Edit" asp-route-personId="@person.PersonId">Edit</a>
                 </td>
+
+                <td>
+                    <a asp-controller="Person" asp-action="Delete" asp-route-personId="@person.PersonId">Delete</a>
+                </td>
             </tr>
         }
     </tbody>

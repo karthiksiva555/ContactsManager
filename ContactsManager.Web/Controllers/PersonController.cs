@@ -103,4 +103,31 @@ public class PersonController(IPersonService personService, ICountryService coun
         personService.UpdatePerson(personUpdateRequest);
         return RedirectToAction("Index", "Person");
     }
+
+    [Route("[action]/{personId:guid}")]
+    [HttpGet]
+    public IActionResult Delete(Guid personId)
+    {
+        var person = personService.GetPersonById(personId);
+        if (person == null)
+        {
+            return RedirectToAction("Index", "Person");
+        }
+
+        return View(person);
+    }
+
+    [Route("[action]/{personId:guid}")]
+    [HttpPost]
+    public IActionResult Delete(PersonUpdateRequest personUpdateRequest)
+    {
+        var person = personService.GetPersonById(personUpdateRequest.PersonId);
+        if (person == null)
+        {
+            return RedirectToAction("Index", "Person");
+        }
+        
+        personService.DeletePerson(personUpdateRequest.PersonId);
+        return RedirectToAction("Index", "Person");
+    }
 }
