@@ -9,10 +9,12 @@ public class PersonAddRequest
     [Required]
     public string PersonName { get; set; } = string.Empty;
 
+    [DataType(DataType.Date)]
     public DateTime? DateOfBirth { get; set; }
 
     public Gender? Gender { get; set; }
 
+    [DataType(DataType.EmailAddress)]
     [EmailAddress(ErrorMessage = "Email Address must be in valid format.")]
     public string? EmailAddress { get; set; }
 
