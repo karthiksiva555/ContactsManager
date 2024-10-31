@@ -15,6 +15,7 @@ public class PersonUpdateRequest
     [Required]
     public string PersonName { get; set; } = string.Empty;
 
+    [DataType(DataType.Date)]
     public DateTime? DateOfBirth { get; set; }
 
     public string? Gender { get; set; }
