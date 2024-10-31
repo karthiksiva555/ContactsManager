@@ -13,8 +13,8 @@ public class PersonServiceTests
 
     public PersonServiceTests(ITestOutputHelper testOutputHelper)
     {
-        _countryService = new CountryService();
-        _personService = new PersonService(_countryService, false);
+        _countryService = new CountryService(null);
+        _personService = new PersonService(_countryService, null);
         _testOutputHelper = testOutputHelper;
     }
 

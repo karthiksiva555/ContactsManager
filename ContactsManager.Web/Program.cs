@@ -1,12 +1,16 @@
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Application.Services;
+using ContactsManager.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 //DI Container
-builder.Services.AddSingleton<ICountryService, CountryService>();
-builder.Services.AddSingleton<IPersonService, PersonService>();
+builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<IPersonService, PersonService>();
+
+builder.Services.AddDbContext<ContactsDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 
 var app = builder.Build();
 

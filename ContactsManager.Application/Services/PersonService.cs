@@ -10,30 +10,15 @@ namespace ContactsManager.Application.Services;
 /// <inheritdoc/>
 public class PersonService : IPersonService
 {
-    private readonly IList<Person> _persons;
+    private readonly ContactsDbContext _database;
     private readonly ICountryService _countryService;
 
-    public PersonService(ICountryService countryService, bool seedData = true)
+    public PersonService(ICountryService countryService, ContactsDbContext contactsDbContext)
     {
         _countryService = countryService;
-        _persons = GetPersonSeed(seedData);
+        _database = contactsDbContext;
     }
 
-    private List<Person> GetPersonSeed(bool seedData)
-    {
-        if (!seedData)
-            return [];
-        var countries = _countryService.GetAllCountries();
-        return
-        [
-            new Person
-            {
-                PersonId = Guid.NewGuid(), PersonName = "Siva", EmailAddress = "test@test.com",
-                DateOfBirth = DateTime.Today.AddYears(-20), Gender = Gender.Male, CountryId = countries[0].CountryId
-            }
-        ];
-    }
-    
     private PersonResponse GetPersonResponse(Person person)
     {
         PersonResponse? personResponse = person.ToPersonResponse();
@@ -69,7 +54,9 @@ public class PersonService : IPersonService
         var person = personToAdd.ToPerson();
         person.PersonId = Guid.NewGuid();
         
-        _persons.Add(person);
+        // _persons.Add(person);
+        _database.Persons.Add(person);
+        _database.SaveChanges();
         
         return GetPersonResponse(person);
     }
@@ -78,7 +65,8 @@ public class PersonService : IPersonService
     public IList<PersonResponse> GetAllPersons()
     {
         List<PersonResponse> persons = [];
-        persons.AddRange(from person in _persons select GetPersonResponse(person));
+        var personsFromDb = _database.Persons.ToList();
+        persons.AddRange(from person in personsFromDb select GetPersonResponse(person));
         return persons;
     }
 
@@ -90,7 +78,7 @@ public class PersonService : IPersonService
             throw new ArgumentNullException(nameof(personId));
         }
 
-        var person = _persons.FirstOrDefault(p => p.PersonId == personId);
+        var person = _database.Persons.FirstOrDefault(p => p.PersonId == personId);
         return person!=null ? GetPersonResponse(person) : null;
     }
 
@@ -149,18 +137,22 @@ public class PersonService : IPersonService
         // Perform all model validations
         ValidationHelper.Validate(personToUpdate);
         
-        var existingPerson = _persons.FirstOrDefault(p => p.PersonId == personToUpdate.PersonId);
+        var existingPerson = _database.Persons.FirstOrDefault(p => p.PersonId == personToUpdate.PersonId);
         if (existingPerson == null)
         {
             throw new ArgumentException("Invalid argument supplied", nameof(personToUpdate.PersonId));
         }
         
+        // Any change to the existing entity will mark it as EntityStateModified = true
         existingPerson.PersonName = personToUpdate.PersonName;
         existingPerson.CountryId = personToUpdate.CountryId;
         existingPerson.EmailAddress = personToUpdate.EmailAddress;
         existingPerson.Gender = Enum.Parse<Gender>(personToUpdate.Gender);
         existingPerson.DateOfBirth = personToUpdate.DateOfBirth;
 
+        // Generates UPDATE statement for all rows with EntityStateModified = true
+        _database.SaveChanges();
+        
         return existingPerson.ToPersonResponse();
     }
 
@@ -172,7 +164,14 @@ public class PersonService : IPersonService
             throw new ArgumentException("Invalid argument supplied", nameof(personId));
         }
         
-        var existingPerson = _persons.FirstOrDefault(p => p.PersonId == personId);
-        return existingPerson != null && _persons.Remove(existingPerson);
+        var existingPerson = _database.Persons.FirstOrDefault(p => p.PersonId == personId);
+
+        if (existingPerson == null)
+            return false;
+        
+        _database.Persons.Remove(existingPerson);
+        _database.SaveChanges();
+        
+        return true;
     }
 }

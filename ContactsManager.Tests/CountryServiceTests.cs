@@ -7,7 +7,7 @@ namespace ContactsManager.Tests;
 
 public class CountryServiceTests
 {
-    private readonly ICountryService _countryService = new CountryService(false);
+    private readonly ICountryService _countryService = new CountryService(null);
     private const string TestCountryName = "TestCountry";
 
     #region AddCountry

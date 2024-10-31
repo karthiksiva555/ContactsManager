@@ -7,21 +7,11 @@ namespace ContactsManager.Application.Services;
 /// <inheritdoc />
 public class CountryService : ICountryService
 {
-    private readonly IList<Country> _countries = [];
+    private readonly ContactsDbContext _database;
 
-    public CountryService(bool seedCountries=true)
+    public CountryService(ContactsDbContext database)
     {
-        if (seedCountries)
-        {
-            _countries =
-            [
-                new Country { CountryId = Guid.NewGuid(), CountryName = "India" },
-                new Country { CountryId = Guid.NewGuid(), CountryName = "Australia" },
-                new Country { CountryId = Guid.NewGuid(), CountryName = "Canada" },
-                new Country { CountryId = Guid.NewGuid(), CountryName = "USA" },
-                new Country { CountryId = Guid.NewGuid(), CountryName = "UK" }
-            ];
-        }
+        _database = database;
     }
 
     /// <inheritdoc />
@@ -34,17 +24,14 @@ public class CountryService : ICountryService
             throw new ArgumentException("Country name is required", nameof(countryToAdd.CountryName));
         }
 
-        if (_countries.Any(c => c.CountryName == countryToAdd.CountryName))
+        if (_database.Countries.Any(c => c.CountryName == countryToAdd.CountryName))
         {
             throw new ArgumentException("Country name must be unique", nameof(countryToAdd.CountryName));
         }
         
-        Country country = countryToAdd.ToCountry();
-        // This has to happen on the database side automatically
-        // we are doing this here only because we are using a dummy database
-        country.CountryId = Guid.NewGuid();
-        _countries.Add(country);
-
+        var country = countryToAdd.ToCountry();
+        _database.Countries.Add(country);
+        _database.SaveChanges();
         return country.ToCountryResponse();
     }
 
@@ -52,7 +39,8 @@ public class CountryService : ICountryService
     IList<CountryResponse> ICountryService.GetAllCountries()
     {
         List<CountryResponse> countries = [];
-        countries.AddRange(from country in _countries
+        var countriesFromDb = _database.Countries.ToList();
+        countries.AddRange(from country in countriesFromDb
                            select country.ToCountryResponse());
         return countries;
     }
@@ -65,7 +53,7 @@ public class CountryService : ICountryService
             throw new ArgumentNullException(nameof(countryId));
         }
 
-        var country = _countries.FirstOrDefault(c => c.CountryId == countryId);
+        var country = _database.Countries.FirstOrDefault(c => c.CountryId == countryId);
         return country?.ToCountryResponse();
     }
 }
