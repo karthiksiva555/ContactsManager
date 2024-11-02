@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContactsManager.Core.Entities;
 
@@ -8,8 +9,10 @@ namespace ContactsManager.Core.Entities;
 public class Country
 {
     [Key]
+    [Column("country_id")]
     public Guid CountryId { get; set; }
 
     [StringLength(50)]
+    [Column("country_name")]
     public string? CountryName { get; set; }
 }

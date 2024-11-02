@@ -3,6 +3,7 @@ using System;
 using ContactsManager.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ContactsManager.Core.Migrations
 {
     [DbContext(typeof(ContactsDbContext))]
-    partial class ContactsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241102003500_AddGetAllPersonsStoredProcedure")]
+    partial class AddGetAllPersonsStoredProcedure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,17 +29,15 @@ namespace ContactsManager.Core.Migrations
                 {
                     b.Property<Guid>("CountryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("country_id");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CountryName")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("country_name");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("CountryId");
 
-                    b.ToTable("countries", (string)null);
+                    b.ToTable("Countries", (string)null);
 
                     b.HasData(
                         new
@@ -60,37 +61,31 @@ namespace ContactsManager.Core.Migrations
                 {
                     b.Property<Guid>("PersonId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("person_id");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("CountryId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("country_id");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_of_birth");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EmailAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("email_address");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("Gender")
-                        .HasColumnType("integer")
-                        .HasColumnName("gender");
+                        .HasColumnType("integer");
 
                     b.Property<string>("PersonName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("person_name");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("PersonId");
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("persons", (string)null);
+                    b.ToTable("Persons", (string)null);
                 });
 
             modelBuilder.Entity("ContactsManager.Core.Entities.Person", b =>

@@ -12,9 +12,9 @@ public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : Db
     {
         base.OnModelCreating(modelBuilder);
         
-        modelBuilder.Entity<Country>().ToTable("Countries");
+        modelBuilder.Entity<Country>().ToTable("countries");
         modelBuilder.Entity<Person>()
-            .ToTable("Persons")
+            .ToTable("persons")
             .HasOne(p => p.Country)
             .WithMany()
             .HasForeignKey(p => p.CountryId);
@@ -32,5 +32,10 @@ public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : Db
             new (){CountryId = Guid.Parse("3eb16cc8-0528-41eb-a2e4-77b06de04e49"), CountryName = "United States of America"}
         };
         modelBuilder.Entity<Country>().HasData(countries);
+    }
+
+    public List<Person> FunctionGetAllPersons()
+    {
+        return Persons.FromSqlRaw("SELECT person_id, person_name, date_of_birth, gender, email_address,country_id FROM GetAllPersons()").ToList();
     }
 }

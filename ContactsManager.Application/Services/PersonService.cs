@@ -65,7 +65,8 @@ public class PersonService : IPersonService
     public IList<PersonResponse> GetAllPersons()
     {
         List<PersonResponse> persons = [];
-        var personsFromDb = _database.Persons.ToList();
+        // var personsFromDb = _database.Persons.ToList();
+        var personsFromDb = _database.FunctionGetAllPersons();
         persons.AddRange(from person in personsFromDb select GetPersonResponse(person));
         return persons;
     }
