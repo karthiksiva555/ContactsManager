@@ -54,9 +54,20 @@ public class PersonService : IPersonService
         var person = personToAdd.ToPerson();
         person.PersonId = Guid.NewGuid();
         
+        // Dummy database
         // _persons.Add(person);
-        _database.Persons.Add(person);
-        _database.SaveChanges();
+        
+        // EF Core with SaveChanges
+        // _database.Persons.Add(person);
+        // _database.SaveChanges();
+        
+        // EF Core with Stored procedure
+        var result = _database.InsertPerson(person);
+
+        if (result == 0)
+        {
+            throw new Exception("Person could not be added.");
+        }
         
         return GetPersonResponse(person);
     }

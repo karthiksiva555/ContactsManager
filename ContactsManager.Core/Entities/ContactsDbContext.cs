@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace ContactsManager.Core.Entities;
 
@@ -37,5 +38,12 @@ public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : Db
     public List<Person> FunctionGetAllPersons()
     {
         return Persons.FromSqlRaw("SELECT person_id, person_name, date_of_birth, gender, email_address,country_id FROM GetAllPersons()").ToList();
+    }
+
+    public int InsertPerson(Person person)
+    {
+        var dateOfBirth = person.DateOfBirth.HasValue ? DateTime.SpecifyKind(person.DateOfBirth.Value, DateTimeKind.Utc) : default;
+        return Database.ExecuteSqlInterpolated(
+            $"CALL insert_person({person.PersonId}, {person.PersonName}, {dateOfBirth}, {person.Gender}, {person.EmailAddress}, {person.CountryId})");
     }
 }
