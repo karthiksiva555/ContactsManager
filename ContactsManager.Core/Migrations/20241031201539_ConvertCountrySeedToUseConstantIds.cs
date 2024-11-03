@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -13,24 +12,11 @@ namespace ContactsManager.Core.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "Countries",
-                keyColumn: "CountryId",
-                keyValue: new Guid("377abe11-3abb-4986-a841-070119526276"));
-
-            migrationBuilder.DeleteData(
-                table: "Countries",
-                keyColumn: "CountryId",
-                keyValue: new Guid("7141296d-0f6a-408e-bb53-25ff131ade4b"));
-
-            migrationBuilder.DeleteData(
-                table: "Countries",
-                keyColumn: "CountryId",
-                keyValue: new Guid("7f65b48d-12cd-450b-8dc5-64cfbafb23ff"));
-
+            migrationBuilder.Sql("DELETE FROM \"Countries\";");
+            
             migrationBuilder.InsertData(
                 table: "Countries",
-                columns: new[] { "CountryId", "CountryName" },
+                columns: ["CountryId", "CountryName"],
                 values: new object[,]
                 {
                     { new Guid("3eb16cc8-0528-41eb-a2e4-77b06de04e49"), "United States of America" },
@@ -59,7 +45,7 @@ namespace ContactsManager.Core.Migrations
 
             migrationBuilder.InsertData(
                 table: "Countries",
-                columns: new[] { "CountryId", "CountryName" },
+                columns: ["CountryId", "CountryName"],
                 values: new object[,]
                 {
                     { new Guid("377abe11-3abb-4986-a841-070119526276"), "Canada" },
