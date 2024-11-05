@@ -9,15 +9,15 @@ namespace ContactsManager.Web.Controllers;
 [Route("[controller]")]
 public class PersonController(IPersonService personService, ICountryService countryService) : Controller
 {
-    private IEnumerable<SelectListItem> GetCountriesForDropdown()
+    private async Task<IEnumerable<SelectListItem>> GetCountriesForDropdownAsync()
     {
-        var countries = countryService.GetAllCountries();
+        var countries = await countryService.GetAllCountriesAsync();
         return countries.Select(country => new SelectListItem(country.CountryName, country.CountryId.ToString()));
     }
     
     [Route("index")]
     [Route("/")]
-    public IActionResult Index(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
+    public async Task<IActionResult> IndexAsync(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
     {
         ViewBag.SearchFields = new Dictionary<string, string>()
         {
@@ -36,7 +36,7 @@ public class PersonController(IPersonService personService, ICountryService coun
         ViewBag.SortOrder = sortOrder.ToString();
         
         // Get filtered persons
-        var filteredPersons = personService.GetFilteredPersons(searchBy ?? nameof(PersonResponse.PersonName), searchString);
+        var filteredPersons = await personService.GetFilteredPersonsAsync(searchBy ?? nameof(PersonResponse.PersonName), searchString);
         
         // sort the filtered persons
         var sortedPersons = personService.GetSortedPersons(filteredPersons, sortBy, sortOrder);
@@ -46,47 +46,47 @@ public class PersonController(IPersonService personService, ICountryService coun
 
     [Route("create")]
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> CreateAsync()
     {
-        ViewBag.Countries = GetCountriesForDropdown();
+        ViewBag.Countries = await GetCountriesForDropdownAsync();
         return View();        
     }
 
     [Route("create")]
     [HttpPost]
-    public IActionResult Create(PersonAddRequest personTAdd)
+    public async Task<IActionResult> CreateAsync(PersonAddRequest personTAdd)
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.Countries = GetCountriesForDropdown();
+            ViewBag.Countries = await GetCountriesForDropdownAsync();
             ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             
             return View();
         }
 
-        personService.AddPerson(personTAdd);
+        await personService.AddPersonAsync(personTAdd);
         return RedirectToAction("Index", "Person");
     }
 
     [Route("[action]/{personId:guid}")]
     [HttpGet]
-    public IActionResult Edit(Guid personId)
+    public async Task<IActionResult> EditAsync(Guid personId)
     {
-        var person = personService.GetPersonById(personId);
+        var person = await personService.GetPersonByIdAsync(personId);
         if (person == null)
         {
             return RedirectToAction("Index", "Person");
         }
-        ViewBag.Countries = GetCountriesForDropdown();
+        ViewBag.Countries = await GetCountriesForDropdownAsync();
         return View(person.ToPersonUpdateRequest());
     }
 
     // This route parameter is required even though the action method parameter is different
     [Route("[action]/{personId:guid}")]
     [HttpPost]
-    public IActionResult Edit(PersonUpdateRequest personUpdateRequest)
+    public async Task<IActionResult> EditAsync(PersonUpdateRequest personUpdateRequest)
     {
-        var personResponse = personService.GetPersonById(personUpdateRequest.PersonId);
+        var personResponse = await personService.GetPersonByIdAsync(personUpdateRequest.PersonId);
         if (personResponse == null)
         {
             return RedirectToAction("Index", "Person");
@@ -94,21 +94,21 @@ public class PersonController(IPersonService personService, ICountryService coun
 
         if (!ModelState.IsValid)
         {
-            ViewBag.Countries = GetCountriesForDropdown();
+            ViewBag.Countries = await GetCountriesForDropdownAsync();
             ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             
             return View();
         }
         
-        personService.UpdatePerson(personUpdateRequest);
+        await personService.UpdatePersonAsync(personUpdateRequest);
         return RedirectToAction("Index", "Person");
     }
 
     [Route("[action]/{personId:guid}")]
     [HttpGet]
-    public IActionResult Delete(Guid personId)
+    public async Task<IActionResult> DeleteAsync(Guid personId)
     {
-        var person = personService.GetPersonById(personId);
+        var person = await personService.GetPersonByIdAsync(personId);
         if (person == null)
         {
             return RedirectToAction("Index", "Person");
@@ -119,15 +119,15 @@ public class PersonController(IPersonService personService, ICountryService coun
 
     [Route("[action]/{personId:guid}")]
     [HttpPost]
-    public IActionResult Delete(PersonUpdateRequest personUpdateRequest)
+    public async Task<IActionResult> DeleteAsync(PersonUpdateRequest personUpdateRequest)
     {
-        var person = personService.GetPersonById(personUpdateRequest.PersonId);
+        var person = await personService.GetPersonByIdAsync(personUpdateRequest.PersonId);
         if (person == null)
         {
             return RedirectToAction("Index", "Person");
         }
         
-        personService.DeletePerson(personUpdateRequest.PersonId);
+        await personService.DeletePersonAsync(personUpdateRequest.PersonId);
         return RedirectToAction("Index", "Person");
     }
 }

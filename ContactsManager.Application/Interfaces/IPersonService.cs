@@ -13,20 +13,20 @@ public interface IPersonService
     /// </summary>
     /// <param name="personToAdd">The Person DTO</param>
     /// <returns>A PersonResponse object after addition is complete.</returns>
-    PersonResponse AddPerson(PersonAddRequest personToAdd);
+    Task<PersonResponse> AddPersonAsync(PersonAddRequest personToAdd);
 
     /// <summary>
     /// Returns all the Person records added prior to this call.
     /// </summary>
     /// <returns>A list of PersonResponse objects</returns>
-    IList<PersonResponse> GetAllPersons();
+    Task<IList<PersonResponse>> GetAllPersonsAsync();
 
     /// <summary>
     /// Finds and returns a person that matches the supplied person id.
     /// </summary>
     /// <param name="personId">The ID of the person to be searched for.</param>
     /// <returns>The matched person if found, null otherwise</returns>
-    PersonResponse? GetPersonById(Guid personId);
+    Task<PersonResponse?> GetPersonByIdAsync(Guid personId);
     
     /// <summary>
     /// Returns all the person objects that matches the give search string in the searchBy field.
@@ -34,7 +34,7 @@ public interface IPersonService
     /// <param name="searchBy">The field to search.</param>
     /// <param name="searchString">The string to search with.</param>
     /// <returns>The person records matching the search criteria</returns>
-    IList<PersonResponse> GetFilteredPersons(string searchBy, string? searchString);
+    Task<IList<PersonResponse>> GetFilteredPersonsAsync(string searchBy, string? searchString);
     
     /// <summary>
     /// Receives a list of persons and returns the list sorted by the field, order specified.
@@ -50,12 +50,12 @@ public interface IPersonService
     /// </summary>
     /// <param name="personToUpdate">The updated person information along with the person id.</param>
     /// <returns>The updated person record</returns>
-    PersonResponse UpdatePerson(PersonUpdateRequest personToUpdate);
+    Task<PersonResponse> UpdatePersonAsync(PersonUpdateRequest personToUpdate);
     
     /// <summary>
     /// Deletes a person matching the supplied person id
     /// </summary>
     /// <param name="personId">The ID of the person to be deleted</param>
     /// <returns>True if deletion is successful, false otherwise</returns>
-    bool DeletePerson(Guid personId);
+    Task<bool> DeletePersonAsync(Guid personId);
 }

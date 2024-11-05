@@ -4,26 +4,18 @@ using ContactsManager.Application.Helpers;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContactsManager.Application.Services;
 
 /// <inheritdoc/>
-public class PersonService : IPersonService
+public class PersonService(ICountryService countryService, ContactsDbContext contactsDbContext)
+    : IPersonService
 {
-    private readonly ContactsDbContext _database;
-    private readonly ICountryService _countryService;
-
-    public PersonService(ICountryService countryService, ContactsDbContext contactsDbContext)
+    private static PersonResponse GetPersonResponse(Person person)
     {
-        _countryService = countryService;
-        _database = contactsDbContext;
-    }
-
-    private PersonResponse GetPersonResponse(Person person)
-    {
-        PersonResponse? personResponse = person.ToPersonResponse();
-        var country = person.CountryId.HasValue ? _countryService.GetCountryById(person.CountryId.Value) : null;
-        personResponse.Country = country?.CountryName ?? string.Empty;
+        var personResponse = person.ToPersonResponse();
+        personResponse.Country = person.Country?.CountryName ?? string.Empty;
 
         return personResponse;
     }
@@ -44,7 +36,7 @@ public class PersonService : IPersonService
     }
     
     /// <inheritdoc/>
-    public PersonResponse AddPerson(PersonAddRequest personToAdd)
+    public async Task<PersonResponse> AddPersonAsync(PersonAddRequest personToAdd)
     {
         ArgumentNullException.ThrowIfNull(personToAdd);
 
@@ -58,44 +50,43 @@ public class PersonService : IPersonService
         // _persons.Add(person);
         
         // EF Core with SaveChanges
-        // _database.Persons.Add(person);
-        // _database.SaveChanges();
+        contactsDbContext.Persons.Add(person);
+        await contactsDbContext.SaveChangesAsync();
         
         // EF Core with Stored procedure
-        var result = _database.InsertPerson(person);
-
-        if (result == 0)
-        {
-            throw new Exception("Person could not be added.");
-        }
+        // var result = contactsDbContext.InsertPerson(person);
+        // if (result == 0)
+        // {
+        //     throw new Exception("Person could not be added.");
+        // }
         
         return GetPersonResponse(person);
     }
 
     /// <inheritdoc/>
-    public IList<PersonResponse> GetAllPersons()
+    public async Task<IList<PersonResponse>> GetAllPersonsAsync()
     {
         List<PersonResponse> persons = [];
-        // var personsFromDb = _database.Persons.ToList();
-        var personsFromDb = _database.FunctionGetAllPersons();
+        var personsFromDb = await contactsDbContext.Persons.ToListAsync();
+        //var personsFromDb = contactsDbContext.FunctionGetAllPersons();
         persons.AddRange(from person in personsFromDb select GetPersonResponse(person));
         return persons;
     }
 
     /// <inheritdoc/>
-    public PersonResponse? GetPersonById(Guid personId)
+    public async Task<PersonResponse?> GetPersonByIdAsync(Guid personId)
     {
         if(personId == Guid.Empty)
         {
             throw new ArgumentNullException(nameof(personId));
         }
 
-        var person = _database.Persons.FirstOrDefault(p => p.PersonId == personId);
+        var person = await contactsDbContext.Persons.FirstOrDefaultAsync(p => p.PersonId == personId);
         return person!=null ? GetPersonResponse(person) : null;
     }
 
     /// <inheritdoc/>
-    public IList<PersonResponse> GetFilteredPersons(string searchBy, string? searchString)
+    public async Task<IList<PersonResponse>> GetFilteredPersonsAsync(string searchBy, string? searchString)
     {
         // If searchBy is null, empty or not a property of Person class, throw exception
         if (string.IsNullOrEmpty(searchBy) || !PropertyOfPerson(searchBy))
@@ -106,10 +97,10 @@ public class PersonService : IPersonService
         // If search string is empty, return all records as result
         if (string.IsNullOrEmpty(searchString))
         {
-            return GetAllPersons();
+            return await GetAllPersonsAsync();
         }
         
-        var allPersons = GetAllPersons();
+        var allPersons = await GetAllPersonsAsync();
         return allPersons.Where(person => PropertyContainsSearchString(searchBy, person, searchString)).ToList();
     }
 
@@ -137,7 +128,7 @@ public class PersonService : IPersonService
 
     /// <exception cref="ArgumentException"></exception>
     /// <inheritdoc/>
-    public PersonResponse UpdatePerson(PersonUpdateRequest personToUpdate)
+    public async Task<PersonResponse> UpdatePersonAsync(PersonUpdateRequest personToUpdate)
     {
         ArgumentNullException.ThrowIfNull(personToUpdate);
 
@@ -149,7 +140,7 @@ public class PersonService : IPersonService
         // Perform all model validations
         ValidationHelper.Validate(personToUpdate);
         
-        var existingPerson = _database.Persons.FirstOrDefault(p => p.PersonId == personToUpdate.PersonId);
+        var existingPerson = await contactsDbContext.Persons.FirstOrDefaultAsync(p => p.PersonId == personToUpdate.PersonId);
         if (existingPerson == null)
         {
             throw new ArgumentException("Invalid argument supplied", nameof(personToUpdate.PersonId));
@@ -159,30 +150,32 @@ public class PersonService : IPersonService
         existingPerson.PersonName = personToUpdate.PersonName;
         existingPerson.CountryId = personToUpdate.CountryId;
         existingPerson.EmailAddress = personToUpdate.EmailAddress;
-        existingPerson.Gender = Enum.Parse<Gender>(personToUpdate.Gender);
+        if (!string.IsNullOrEmpty(personToUpdate.Gender) &&
+            Enum.TryParse<Gender>(personToUpdate.Gender, out var gender))
+            existingPerson.Gender = gender;
         existingPerson.DateOfBirth = personToUpdate.DateOfBirth;
 
         // Generates UPDATE statement for all rows with EntityStateModified = true
-        _database.SaveChanges();
+        await contactsDbContext.SaveChangesAsync();
         
         return existingPerson.ToPersonResponse();
     }
 
     /// <inheritdoc/>
-    public bool DeletePerson(Guid personId)
+    public async Task<bool> DeletePersonAsync(Guid personId)
     {
         if (personId == Guid.Empty)
         {
             throw new ArgumentException("Invalid argument supplied", nameof(personId));
         }
         
-        var existingPerson = _database.Persons.FirstOrDefault(p => p.PersonId == personId);
+        var existingPerson = await contactsDbContext.Persons.FirstOrDefaultAsync(p => p.PersonId == personId);
 
         if (existingPerson == null)
             return false;
         
-        _database.Persons.Remove(existingPerson);
-        _database.SaveChanges();
+        contactsDbContext.Persons.Remove(existingPerson);
+        await contactsDbContext.SaveChangesAsync();
         
         return true;
     }
