@@ -1,13 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace ContactsManager.Core.Entities;
 
 public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : DbContext(options)
 {
-    public DbSet<Country> Countries { get; set; }
+    public virtual DbSet<Country> Countries { get; set; }
 
-    public DbSet<Person> Persons { get; set; }
+    public virtual DbSet<Person> Persons { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,7 +23,7 @@ public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : Db
             .Property(p => p.DateOfBirth)
             .HasConversion(v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : (DateTime?)null,
                 v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
-        
+
         // seed the entities
         var countries = new List<Country>()
         {

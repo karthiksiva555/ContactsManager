@@ -44,13 +44,12 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
         ValidationHelper.Validate(personToAdd);
 
         var person = personToAdd.ToPerson();
-        person.PersonId = Guid.NewGuid();
         
         // Dummy database
         // _persons.Add(person);
         
         // EF Core with SaveChanges
-        contactsDbContext.Persons.Add(person);
+        await contactsDbContext.Persons.AddAsync(person);
         await contactsDbContext.SaveChangesAsync();
         
         // EF Core with Stored procedure
@@ -60,14 +59,16 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
         //     throw new Exception("Person could not be added.");
         // }
         
-        return GetPersonResponse(person);
+        var addedPerson = await contactsDbContext.Persons.Include(p => p.Country).FirstOrDefaultAsync(p => p.PersonId == person.PersonId);
+        
+        return GetPersonResponse(addedPerson);
     }
 
     /// <inheritdoc/>
     public async Task<IList<PersonResponse>> GetAllPersonsAsync()
     {
         List<PersonResponse> persons = [];
-        var personsFromDb = await contactsDbContext.Persons.ToListAsync();
+        var personsFromDb = await contactsDbContext.Persons.Include(p => p.Country).ToListAsync();
         //var personsFromDb = contactsDbContext.FunctionGetAllPersons();
         persons.AddRange(from person in personsFromDb select GetPersonResponse(person));
         return persons;

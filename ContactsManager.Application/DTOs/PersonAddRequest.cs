@@ -25,6 +25,6 @@ public static class PersonAddRequestExtensions
 {
     public static Person ToPerson(this PersonAddRequest personAddRequest)
     {
-        return new Person(){ PersonName = personAddRequest.PersonName, CountryId = personAddRequest.CountryId, EmailAddress = personAddRequest.EmailAddress, DateOfBirth = personAddRequest.DateOfBirth, Gender = personAddRequest.Gender};
+        return new Person { PersonId = Guid.NewGuid(), PersonName = personAddRequest.PersonName, CountryId = personAddRequest.CountryId, EmailAddress = personAddRequest.EmailAddress, DateOfBirth = personAddRequest.DateOfBirth, Gender = personAddRequest.Gender};
     }
 }
