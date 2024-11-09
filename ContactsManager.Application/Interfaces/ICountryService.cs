@@ -9,7 +9,7 @@ public interface ICountryService
     /// </summary>
     /// <param name="countryToAdd">The country to be added supplied in the form of a DTO</param>
     /// <returns>The country that was just added, returned as a DTO</returns>
-    Task<CountryResponse?> AddCountryAsync(CountryAddRequest countryToAdd);
+    Task<CountryResponse> AddCountryAsync(CountryAddRequest countryToAdd);
 
     /// <summary>
     /// Returns all the countries that are previously added to the database.

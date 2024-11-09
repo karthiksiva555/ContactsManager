@@ -11,7 +11,7 @@ public class CountryResponse
 
 public static class CountryResponseExtensions 
 {
-    public static CountryResponse? ToCountryResponse(this Country country)
+    public static CountryResponse ToCountryResponse(this Country country)
     {
         return new CountryResponse() { CountryId = country.CountryId, CountryName = country.CountryName };
     }

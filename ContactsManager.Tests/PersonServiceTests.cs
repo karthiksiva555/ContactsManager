@@ -1,9 +1,9 @@
+using AutoFixture;
 using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
 using EntityFrameworkCoreMock;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 
@@ -14,9 +14,12 @@ public class PersonServiceTests
     private readonly CountryService _countryService;
     private readonly PersonService _personService;
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly IFixture _fixture;
 
     public PersonServiceTests(ITestOutputHelper testOutputHelper)
     {
+        _fixture = new Fixture();
+        
         DbContextMock<ContactsDbContext> dbContextMock = new(new DbContextOptionsBuilder<ContactsDbContext>().Options);
         
         dbContextMock.CreateDbSetMock(db => db.Countries, new List<Country>().AsQueryable());
@@ -48,7 +51,9 @@ public class PersonServiceTests
     [Fact]
     public async Task AddPersonAsync_PersonNameIsNull_ThrowsArgumentException()
     {
-        PersonAddRequest personToAdd = new() { PersonName = null!};
+        // PersonAddRequest personToAdd = new() { PersonName = null!};
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.PersonName, null! as string).Create();
 
         await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.AddPersonAsync(personToAdd));
     }
@@ -56,7 +61,9 @@ public class PersonServiceTests
     [Fact]
     public async Task AddPersonAsync_EmailAddressIsNotValid_ThrowsArgumentException()
     {
-        PersonAddRequest personToAdd = new() { PersonName = "Test Person", EmailAddress = "test.com"};
+        // PersonAddRequest personToAdd = new() { PersonName = "Test Person", EmailAddress = "test.com"};
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test.com").Create();
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() => _personService.AddPersonAsync(personToAdd));
         Assert.Equal("Email Address must be in valid format.", exception.Message);
@@ -65,10 +72,17 @@ public class PersonServiceTests
     [Fact]
     public async Task AddPersonAsync_PersonInputIsValid_ReturnsAddedPerson()
     {
-        CountryAddRequest countryToAdd = new() { CountryName = "Test Country" };
-        var countryResponse = await _countryService.AddCountryAsync(countryToAdd);
-        PersonAddRequest personToAdd = new() { PersonName = "Siva", DateOfBirth = new DateTime(1989, 05, 24), Gender = Gender.Male, EmailAddress = "test@tes.com", CountryId = countryResponse?.CountryId };
+        // CountryAddRequest countryToAdd = new() { CountryName = "Test Country" };
+        // var countryResponse = await _countryService.AddCountryAsync(countryToAdd);
+        // // PersonAddRequest personToAdd = new() { PersonName = "Siva", DateOfBirth = new DateTime(1989, 05, 24), Gender = Gender.Male, EmailAddress = "test@tes.com", CountryId = countryResponse?.CountryId };
+        
+        // This will generate dummy values for each property
+        // var personToAdd = _fixture.Create<PersonAddRequest>();
 
+        // This will let us override specific property values
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test@test.com").Create();
+        
         _testOutputHelper.WriteLine("Calling the Add Person method");
         PersonResponse addedPerson = await _personService.AddPersonAsync(personToAdd);
 
@@ -98,15 +112,19 @@ public class PersonServiceTests
     [Fact]
     public async Task GetAllPersons_AfterInitialization_ReturnsAddedPersons()
     {
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Ram"});
-        await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Robert"});
+        var person1=_fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        var person2=_fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test2@test.com").Create();
+        await _personService.AddPersonAsync(person1);
+        await _personService.AddPersonAsync(person2);
 
         var persons = await _personService.GetAllPersonsAsync();
         var personNames = GetPersonNames(persons);
         Assert.Equal(2, persons.Count);
         
-        Assert.Contains("Ram", personNames);
-        Assert.Contains("Robert", personNames);
+        Assert.Contains(person1.PersonName, personNames);
+        Assert.Contains(person2.PersonName, personNames);
     }
     
     #endregion
@@ -130,7 +148,9 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_NoMatchingPersonFound_ReturnsNull()
     {
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Rahim"});
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test@test.com").Create();
+        await _personService.AddPersonAsync(personToAdd);
 
         var person = await _personService.GetPersonByIdAsync(Guid.NewGuid());
 
@@ -140,8 +160,11 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_MatchingPersonFound_ReturnsMatchingPerson()
     {
-        var personAdded = await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Rahim"});
-
+        // var personAdded = await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Rahim"});
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test@test.com").Create();
+        var personAdded = await _personService.AddPersonAsync(personToAdd);
+        
         var person = await _personService.GetPersonByIdAsync(personAdded.PersonId);
 
         Assert.NotNull(person);
@@ -174,25 +197,40 @@ public class PersonServiceTests
     [Fact]
     public async Task GetFilteredPersons_EmptySearchString_ReturnsAllPersons()
     {
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Ram"});
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "rahim"});
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Robert"});
+        var person1 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        var person2 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test2@test.com").Create();
+        var person3 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test3@test.com").Create();
+        await _personService.AddPersonAsync(person1);
+        await _personService.AddPersonAsync(person2);
+        await _personService.AddPersonAsync(person3);
         
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "");
         
         Assert.Equal(3, filteredPersons.Count);
         var personNames = GetPersonNames(filteredPersons);
-        Assert.Contains("Ram", personNames);
-        Assert.Contains("rahim", personNames);
-        Assert.Contains("Robert", personNames);
+        Assert.Contains(person1.PersonName, personNames);
+        Assert.Contains(person2.PersonName, personNames);
+        Assert.Contains(person3.PersonName, personNames);
     }
 
     [Fact]
     public async Task GetFilteredPersons_SearchStringIsValid_ReturnsFilteredPersons()
     {
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Ram"});
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "rahim"});
-        await _personService.AddPersonAsync(new PersonAddRequest(){ PersonName = "Robert"});
+        var person1 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.PersonName, "Ram")
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        var person2 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.PersonName, "rahim")
+            .With(p => p.EmailAddress, "test2@test.com").Create();
+        var person3 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.PersonName, "Robert")
+            .With(p => p.EmailAddress, "test3@test.com").Create();
+        await _personService.AddPersonAsync(person1);
+        await _personService.AddPersonAsync(person2);
+        await _personService.AddPersonAsync(person3);
         
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "ra");
         
@@ -222,6 +260,7 @@ public class PersonServiceTests
     [InlineData("InvalidPropertyName")]
     public void GetSortedPersons_InvalidSortByValue_ThrowsArgumentException(string sortBy)
     {
+        // Not using fixture here as this doesn't need a person to be created in dbcontext
         List<PersonResponse> persons = [
             new() { PersonName = "Hanuman"}
         ];
@@ -278,7 +317,9 @@ public class PersonServiceTests
     [Fact]
     public async Task UpdatePerson_PersonIdIsNull_ThrowsArgumentException()
     {
-        PersonUpdateRequest personUpdateRequest = new() { PersonName = "Test" };
+        // PersonUpdateRequest personUpdateRequest = new() { PersonName = "Test" };
+        var personUpdateRequest = _fixture.Build<PersonUpdateRequest>()
+            .With(p => p.EmailAddress, "test@test.com").Create();
         
         await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.UpdatePersonAsync(personUpdateRequest));
     }
@@ -286,9 +327,15 @@ public class PersonServiceTests
     [Fact]
     public async Task UpdatePerson_PersonIdDoesNotExist_ThrowsArgumentException()
     {
-        await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Test 1" });
-        await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Test 2" });
-        var personToUpdate = new PersonUpdateRequest() { PersonId = Guid.NewGuid(), PersonName = "Update Test"};
+        var person1 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        var person2 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test2@test.com").Create();
+        await _personService.AddPersonAsync(person1);
+        await _personService.AddPersonAsync(person2);
+        
+        // var personToUpdate = new PersonUpdateRequest() { PersonId = Guid.NewGuid(), PersonName = "Update Test"};
+        var personToUpdate = _fixture.Build<PersonUpdateRequest>().With(p => p.EmailAddress, "test3@test.com").Create();
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.UpdatePersonAsync(personToUpdate));
         Assert.Equal("Invalid argument supplied (Parameter \'PersonId\')", exception.Message);
@@ -297,9 +344,18 @@ public class PersonServiceTests
     [Fact]
     public async Task UpdatePerson_ValidPersonUpdateRequest_PersonIsUpdated()
     {
-        var person1 = await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Test 1" });
-        await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Test 2" });
-        var personToUpdate = new PersonUpdateRequest() { PersonId = person1.PersonId, PersonName = "Updated Name"};
+        var personAddRequest1 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        var personAddRequest2 = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test2@test.com").Create();
+        var person1 = await _personService.AddPersonAsync(personAddRequest1);
+        await _personService.AddPersonAsync(personAddRequest2);
+        
+        // var personToUpdate = new PersonUpdateRequest() { PersonId = person1.PersonId, PersonName = "Updated Name"};
+        var personToUpdate = _fixture.Build<PersonUpdateRequest>()
+            .With(p => p.PersonId, person1.PersonId)
+            .With(p => p.PersonName, "Updated Name")
+            .With(p => p.EmailAddress, "test3@test.com").Create();
         
         var updatedPerson = await _personService.UpdatePersonAsync(personToUpdate);
         
@@ -322,7 +378,9 @@ public class PersonServiceTests
     [Fact]
     public async Task DeletePerson_PersonIdDoesNotExistInList_ReturnsFalse()
     {
-        await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Test 1" });
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        await _personService.AddPersonAsync(personToAdd);
         
         var result = await _personService.DeletePersonAsync(Guid.NewGuid());
         
@@ -332,7 +390,9 @@ public class PersonServiceTests
     [Fact]
     public async Task DeletePerson_PersonIdExistsInTheList_DeletesPersonAndReturnsTrue()
     {
-        var person1 = await _personService.AddPersonAsync(new PersonAddRequest() { PersonName = "Test 1" });
+        var personToAdd = _fixture.Build<PersonAddRequest>()
+            .With(p => p.EmailAddress, "test1@test.com").Create();
+        var person1 = await _personService.AddPersonAsync(personToAdd);
         
         var result = await _personService.DeletePersonAsync(person1.PersonId);
         

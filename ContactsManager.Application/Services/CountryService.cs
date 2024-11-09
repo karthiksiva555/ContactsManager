@@ -9,7 +9,7 @@ namespace ContactsManager.Application.Services;
 public class CountryService(ContactsDbContext database) : ICountryService
 {
     /// <inheritdoc />
-    public async Task<CountryResponse?> AddCountryAsync(CountryAddRequest countryToAdd)
+    public async Task<CountryResponse> AddCountryAsync(CountryAddRequest countryToAdd)
     {
         ArgumentNullException.ThrowIfNull(countryToAdd);
 
