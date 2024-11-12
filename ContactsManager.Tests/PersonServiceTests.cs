@@ -4,6 +4,7 @@ using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
 using EntityFrameworkCoreMock;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 
@@ -14,7 +15,7 @@ public class PersonServiceTests
     private readonly CountryService _countryService;
     private readonly PersonService _personService;
     private readonly ITestOutputHelper _testOutputHelper;
-    private readonly IFixture _fixture;
+    private readonly Fixture _fixture;
 
     public PersonServiceTests(ITestOutputHelper testOutputHelper)
     {
@@ -37,6 +38,20 @@ public class PersonServiceTests
         var personNames = from person in persons select person.PersonName;
         return personNames as string[] ?? personNames.ToArray();
     }
+
+    private static int GetAgeFromDateOfBirth(DateTime? dateOfBirth)
+    {
+        if (!dateOfBirth.HasValue)
+        {
+            return 0;
+        }
+        
+        var age = DateTime.UtcNow.Year - dateOfBirth.Value.Year;
+        if(dateOfBirth.Value.DayOfYear > DateTime.UtcNow.DayOfYear)
+            age--;
+
+        return age;
+    }
     
     #endregion Private Methods
     
@@ -45,7 +60,10 @@ public class PersonServiceTests
     [Fact]
     public async Task AddPersonAsync_InputIsNull_ThrowsArgumentNullException()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(async () => await _personService.AddPersonAsync(null!));
+        // await Assert.ThrowsAsync<ArgumentNullException>(async () => await _personService.AddPersonAsync(null!));
+        
+        Func<Task> action = async () => await _personService.AddPersonAsync(null!);
+        await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -53,9 +71,11 @@ public class PersonServiceTests
     {
         // PersonAddRequest personToAdd = new() { PersonName = null!};
         var personToAdd = _fixture.Build<PersonAddRequest>()
-            .With(p => p.PersonName, null! as string).Create();
+            .With(p => p.PersonName, null as string).Create();
 
-        await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.AddPersonAsync(personToAdd));
+        // await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.AddPersonAsync(personToAdd));
+        Func<Task> action = async () => await _personService.AddPersonAsync(personToAdd);
+        await action.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -65,8 +85,11 @@ public class PersonServiceTests
         var personToAdd = _fixture.Build<PersonAddRequest>()
             .With(p => p.EmailAddress, "test.com").Create();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => _personService.AddPersonAsync(personToAdd));
-        Assert.Equal("Email Address must be in valid format.", exception.Message);
+        
+        // var exception = await Assert.ThrowsAsync<ArgumentException>(() => _personService.AddPersonAsync(personToAdd));
+        // Assert.Equal("Email Address must be in valid format.", exception.Message);
+        Func<Task> action = async () => await _personService.AddPersonAsync(personToAdd);
+        await action.Should().ThrowAsync<ArgumentException>().WithMessage("Email Address must be in valid format.");
     }
 
     [Fact]
@@ -84,17 +107,22 @@ public class PersonServiceTests
             .With(p => p.EmailAddress, "test@test.com").Create();
         
         _testOutputHelper.WriteLine("Calling the Add Person method");
-        PersonResponse addedPerson = await _personService.AddPersonAsync(personToAdd);
+        var addedPerson = await _personService.AddPersonAsync(personToAdd);
 
-        Assert.NotEqual(Guid.Empty, addedPerson.PersonId);
-        Assert.Equal(personToAdd.PersonName, addedPerson.PersonName);
-        var expectedAge = DateTime.Now.Year - personToAdd.DateOfBirth?.Year;
-        _testOutputHelper.WriteLine($"Verifying the age property is calculated correctly");
-        Assert.Equal(expectedAge, addedPerson.Age);
-        Assert.Equal(personToAdd.EmailAddress, addedPerson.EmailAddress);
+        // Assert.NotEqual(Guid.Empty, addedPerson.PersonId);
+        // Assert.Equal(personToAdd.PersonName, addedPerson.PersonName);
+        // var expectedAge = DateTime.Now.Year - personToAdd.DateOfBirth?.Year;
+        // _testOutputHelper.WriteLine($"Verifying the age property is calculated correctly");
+        // Assert.Equal(expectedAge, addedPerson.Age);
+        // Assert.Equal(personToAdd.EmailAddress, addedPerson.EmailAddress);
         // Unit Testing navigation props is not easy in EF Core
         // This will fail as the person entity won't fetch Country object even with .Include() on Person fetch
         //Assert.Equal(countryResponse?.CountryName, addedPerson.Country);
+        addedPerson.PersonId.Should().NotBe(Guid.Empty);
+        addedPerson.PersonName.Should().Be(personToAdd.PersonName);
+        addedPerson.EmailAddress.Should().Be(personToAdd.EmailAddress);
+        _testOutputHelper.WriteLine($"Verifying the age property is calculated correctly");
+        addedPerson.Age.Should().Be(GetAgeFromDateOfBirth(personToAdd.DateOfBirth));
     }
 
     #endregion
@@ -106,7 +134,8 @@ public class PersonServiceTests
     {
         var persons = await _personService.GetAllPersonsAsync();
 
-        Assert.Empty(persons);
+        // Assert.Empty(persons);
+        persons.Should().BeEmpty();
     }
 
     [Fact]
@@ -120,11 +149,15 @@ public class PersonServiceTests
         await _personService.AddPersonAsync(person2);
 
         var persons = await _personService.GetAllPersonsAsync();
-        var personNames = GetPersonNames(persons);
-        Assert.Equal(2, persons.Count);
         
-        Assert.Contains(person1.PersonName, personNames);
-        Assert.Contains(person2.PersonName, personNames);
+        // var personNames = GetPersonNames(persons);
+        // Assert.Equal(2, persons.Count);
+        // Assert.Contains(person1.PersonName, personNames);
+        // Assert.Contains(person2.PersonName, personNames);
+        
+        persons.Should().HaveCount(2);
+        persons.Select(p => p.PersonName).Should().Contain(person1.PersonName);
+        persons.Select(p => p.PersonName).Should().Contain(person2.PersonName);
     }
     
     #endregion
@@ -134,15 +167,20 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_NullPersonId_ThrowsArgumentNullException()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _personService.GetPersonByIdAsync(Guid.Empty));
+        // await Assert.ThrowsAsync<ArgumentNullException>(() => _personService.GetPersonByIdAsync(Guid.Empty));
+        
+        Func<Task> action = () => _personService.GetPersonByIdAsync(Guid.Empty);
+        
+        await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public async Task GetPersonById_PersonListIsEmpty_ReturnsNull()
     {
-        PersonResponse? person = await _personService.GetPersonByIdAsync(Guid.NewGuid());
+        var person = await _personService.GetPersonByIdAsync(Guid.NewGuid());
 
-        Assert.Null(person);
+        // Assert.Null(person);
+        person.Should().BeNull();
     }
 
     [Fact]
@@ -154,7 +192,8 @@ public class PersonServiceTests
 
         var person = await _personService.GetPersonByIdAsync(Guid.NewGuid());
 
-        Assert.Null(person);
+        // Assert.Null(person);
+        person.Should().BeNull();
     }
 
     [Fact]
@@ -167,9 +206,13 @@ public class PersonServiceTests
         
         var person = await _personService.GetPersonByIdAsync(personAdded.PersonId);
 
-        Assert.NotNull(person);
-        Assert.Equal(personAdded.PersonName, person.PersonName);
-        Assert.Equal(personAdded.PersonId, person.PersonId);
+        // Assert.NotNull(person);
+        // Assert.Equal(personAdded.PersonName, person.PersonName);
+        // Assert.Equal(personAdded.PersonId, person.PersonId);
+        
+        person.Should().NotBeNull();
+        person?.PersonName.Should().Be(personAdded.PersonName);
+        person?.PersonId.Should().Be(personAdded.PersonId);
     }
 
     #endregion
@@ -182,7 +225,11 @@ public class PersonServiceTests
     [InlineData("InvalidPropertyName")]
     public async Task GetFilteredPersons_InvalidSearchByValue_ThrowsArgumentException(string searchBy)
     {
-        await Assert.ThrowsAsync<ArgumentException>(() => _personService.GetFilteredPersonsAsync(searchBy, "any"));
+        // await Assert.ThrowsAsync<ArgumentException>(() => _personService.GetFilteredPersonsAsync(searchBy, "any"));
+
+        Func<Task> action = () => _personService.GetFilteredPersonsAsync(searchBy, "any");
+        
+        await action.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -191,7 +238,9 @@ public class PersonServiceTests
         // Person list is empty in the beginning
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "Si");
         
-        Assert.Empty(filteredPersons);
+        // Assert.Empty(filteredPersons);
+        
+        filteredPersons.Should().BeEmpty();
     }
 
     [Fact]
@@ -209,11 +258,17 @@ public class PersonServiceTests
         
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "");
         
-        Assert.Equal(3, filteredPersons.Count);
+        // Assert.Equal(3, filteredPersons.Count);
+        // var personNames = GetPersonNames(filteredPersons);
+        // Assert.Contains(person1.PersonName, personNames);
+        // Assert.Contains(person2.PersonName, personNames);
+        // Assert.Contains(person3.PersonName, personNames);
+        
+        filteredPersons.Should().HaveCount(3);
         var personNames = GetPersonNames(filteredPersons);
-        Assert.Contains(person1.PersonName, personNames);
-        Assert.Contains(person2.PersonName, personNames);
-        Assert.Contains(person3.PersonName, personNames);
+        personNames.Should().Contain(person1.PersonName);
+        personNames.Should().Contain(person2.PersonName);
+        personNames.Should().Contain(person3.PersonName);
     }
 
     [Fact]
@@ -234,10 +289,15 @@ public class PersonServiceTests
         
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "ra");
         
-        Assert.Equal(2, filteredPersons.Count);
+        // Assert.Equal(2, filteredPersons.Count);
+        // var personNames = GetPersonNames(filteredPersons);
+        // Assert.Contains("rahim", personNames);
+        // Assert.Contains("Ram", personNames);
+        
+        filteredPersons.Should().HaveCount(2);
         var personNames = GetPersonNames(filteredPersons);
-        Assert.Contains("rahim", personNames);
-        Assert.Contains("Ram", personNames);
+        personNames.Should().Contain(person1.PersonName);
+        personNames.Should().Contain(person2.PersonName);
     }
     
     #endregion
@@ -251,7 +311,9 @@ public class PersonServiceTests
 
         var sortedPersons = _personService.GetSortedPersons(persons, "PersonName", SortOrder.Asc);
         
-        Assert.Empty(sortedPersons);
+        // Assert.Empty(sortedPersons);
+        
+        sortedPersons.Should().BeEmpty();
     }
 
     [Theory]
@@ -265,7 +327,11 @@ public class PersonServiceTests
             new() { PersonName = "Hanuman"}
         ];
         
-        Assert.Throws<ArgumentException>(() => _personService.GetSortedPersons(persons, sortBy, SortOrder.Asc));
+        // Assert.Throws<ArgumentException>(() => _personService.GetSortedPersons(persons, sortBy, SortOrder.Asc));
+        
+        var action = () => _personService.GetSortedPersons(persons, sortBy, SortOrder.Asc);
+
+        action.Should().Throw<ArgumentException>();
     }
 
     [Fact]
@@ -280,10 +346,14 @@ public class PersonServiceTests
         
         var sortedPersons = _personService.GetSortedPersons(persons, "PersonName", SortOrder.Asc);
         
-        Assert.Equal(3, sortedPersons.Count);
-        Assert.Equal("Lakshmana", sortedPersons[0].PersonName);
-        Assert.Equal("Rama", sortedPersons[1].PersonName);
-        Assert.Equal("Seetha", sortedPersons[2].PersonName);
+        // Assert.Equal(3, sortedPersons.Count);
+        // Assert.Equal("Lakshmana", sortedPersons[0].PersonName);
+        // Assert.Equal("Rama", sortedPersons[1].PersonName);
+        // Assert.Equal("Seetha", sortedPersons[2].PersonName);
+        sortedPersons.Should().HaveCount(3);
+        sortedPersons.ElementAt(0).PersonName.Should().Be("Lakshmana");
+        sortedPersons.ElementAt(1).PersonName.Should().Be("Rama");
+        sortedPersons.ElementAt(2).PersonName.Should().Be("Seetha");
     }
     
     [Fact]
@@ -298,10 +368,15 @@ public class PersonServiceTests
         
         var sortedPersons = _personService.GetSortedPersons(persons, "PersonName", SortOrder.Desc);
         
-        Assert.Equal(3, sortedPersons.Count);
-        Assert.Equal("Seetha", sortedPersons[0].PersonName);
-        Assert.Equal("Rama", sortedPersons[1].PersonName);
-        Assert.Equal("Lakshmana", sortedPersons[2].PersonName);
+        // Assert.Equal(3, sortedPersons.Count);
+        // Assert.Equal("Seetha", sortedPersons[0].PersonName);
+        // Assert.Equal("Rama", sortedPersons[1].PersonName);
+        // Assert.Equal("Lakshmana", sortedPersons[2].PersonName);
+        
+        sortedPersons.Should().HaveCount(3);
+        sortedPersons.ElementAt(0).PersonName.Should().Be("Seetha");
+        sortedPersons.ElementAt(1).PersonName.Should().Be("Rama");
+        sortedPersons.ElementAt(2).PersonName.Should().Be("Lakshmana");
     }
     
     #endregion
@@ -311,7 +386,11 @@ public class PersonServiceTests
     [Fact]
     public async Task UpdatePerson_PersonUpdateRequestIsNull_ThrowsArgumentNullException()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _personService.UpdatePersonAsync(null!));
+        // await Assert.ThrowsAsync<ArgumentNullException>(() => _personService.UpdatePersonAsync(null!));
+        
+        Func<Task> action = async () => await _personService.UpdatePersonAsync(null!);
+
+        await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -321,7 +400,11 @@ public class PersonServiceTests
         var personUpdateRequest = _fixture.Build<PersonUpdateRequest>()
             .With(p => p.EmailAddress, "test@test.com").Create();
         
-        await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.UpdatePersonAsync(personUpdateRequest));
+        // await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.UpdatePersonAsync(personUpdateRequest));
+        
+        Func<Task> action = async () => await _personService.UpdatePersonAsync(personUpdateRequest);
+        
+        await action.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -337,8 +420,12 @@ public class PersonServiceTests
         // var personToUpdate = new PersonUpdateRequest() { PersonId = Guid.NewGuid(), PersonName = "Update Test"};
         var personToUpdate = _fixture.Build<PersonUpdateRequest>().With(p => p.EmailAddress, "test3@test.com").Create();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.UpdatePersonAsync(personToUpdate));
-        Assert.Equal("Invalid argument supplied (Parameter \'PersonId\')", exception.Message);
+        // var exception = await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.UpdatePersonAsync(personToUpdate));
+        // Assert.Equal("Invalid argument supplied (Parameter \'PersonId\')", exception.Message);
+        
+        Func<Task> action = async () => await _personService.UpdatePersonAsync(personToUpdate);
+        
+        await action.Should().ThrowAsync<ArgumentException>().WithMessage(@"Invalid argument supplied (Parameter 'PersonId')");
     }
 
     [Fact]
@@ -359,10 +446,14 @@ public class PersonServiceTests
         
         var updatedPerson = await _personService.UpdatePersonAsync(personToUpdate);
         
-        Assert.Equal(personToUpdate.PersonName, updatedPerson.PersonName);
+        // Assert.Equal(personToUpdate.PersonName, updatedPerson.PersonName);
+        // var person = await _personService.GetPersonByIdAsync(person1.PersonId);
+        // Assert.NotNull(person);
+        // Assert.Equal(personToUpdate.PersonName, person.PersonName);
+        updatedPerson.PersonName.Should().Be(personToUpdate.PersonName);
         var person = await _personService.GetPersonByIdAsync(person1.PersonId);
-        Assert.NotNull(person);
-        Assert.Equal(personToUpdate.PersonName, person.PersonName);
+        person.Should().NotBeNull();
+        person?.PersonName.Should().Be(personToUpdate.PersonName);
     }
     
     #endregion
@@ -372,7 +463,11 @@ public class PersonServiceTests
     [Fact]
     public async Task DeletePerson_PersonIdIsInvalid_ThrowsArgumentException()
     {
-        await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.DeletePersonAsync(Guid.Empty));
+        // await Assert.ThrowsAsync<ArgumentException>(async () => await _personService.DeletePersonAsync(Guid.Empty));
+        
+        Func<Task> action = async () => await _personService.DeletePersonAsync(Guid.Empty);
+        
+        await action.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -384,7 +479,8 @@ public class PersonServiceTests
         
         var result = await _personService.DeletePersonAsync(Guid.NewGuid());
         
-        Assert.False(result);
+        // Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -396,9 +492,13 @@ public class PersonServiceTests
         
         var result = await _personService.DeletePersonAsync(person1.PersonId);
         
-        Assert.True(result);
+        // Assert.True(result);
+        // var person = await _personService.GetPersonByIdAsync(person1.PersonId);
+        // Assert.Null(person);
+        
+        result.Should().BeTrue();
         var person = await _personService.GetPersonByIdAsync(person1.PersonId);
-        Assert.Null(person);
+        person.Should().BeNull();
     }
     
     #endregion
