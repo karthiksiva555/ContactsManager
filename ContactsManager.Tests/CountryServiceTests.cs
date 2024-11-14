@@ -27,20 +27,16 @@ public class CountryServiceTests
     [Fact]
     public async Task AddCountryAsync_NullInput_ThrowsArgumentNullException()
     {
-        // Assert.ThrowsAsync<ArgumentNullException>(() => _countryService.AddCountryAsync(null!));
-        
         Func<Task> action = async () => await _countryService.AddCountryAsync(null!);
+
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public async Task AddCountryAsync_CountryNameEmpty_ThrowsArgumentException()
     {
-        // CountryAddRequest input = new () {CountryName = string.Empty};
         var input = _fixture.Build<CountryAddRequest>()
             .With(c => c.CountryName, string.Empty).Create();
-        
-        // Assert.ThrowsAsync<ArgumentException>(async () => await _countryService.AddCountryAsync(input));
         
         Func<Task> action = async () => await _countryService.AddCountryAsync(input);
         await action.Should().ThrowAsync<ArgumentException>();
@@ -49,15 +45,11 @@ public class CountryServiceTests
     [Fact]
     public async Task AddCountryAsync_CountryNameDuplicate_ThrowsArgumentException()
     {
-        // CountryAddRequest existingCountry = new() { CountryName = TestCountryName };
         var existingCountry = _fixture.Create<CountryAddRequest>();
         await _countryService.AddCountryAsync(existingCountry);
 
-        // CountryAddRequest newCountry = new() { CountryName = TestCountryName };
         var newCountry = _fixture.Build<CountryAddRequest>()
             .With(c => c.CountryName, existingCountry.CountryName).Create();
-        
-        // await Assert.ThrowsAsync<ArgumentException>(async () => await _countryService.AddCountryAsync(newCountry));
         
         Func<Task> action = async () => await _countryService.AddCountryAsync(newCountry);
         await action.Should().ThrowAsync<ArgumentException>();
@@ -66,14 +58,10 @@ public class CountryServiceTests
     [Fact]
     public async Task AddCountryAsync_ValidCountryInput_AddsCountryToDatabase()
     {
-        // CountryAddRequest input = new () {CountryName = TestCountryName};
         var input = _fixture.Create<CountryAddRequest>();
         
         var actual = await _countryService.AddCountryAsync(input);
         
-        // Assert.NotNull(actual);
-        // Assert.NotEqual(Guid.Empty, actual.CountryId);
-        // Assert.Equal(input.CountryName, actual.CountryName);
         actual.Should().NotBeNull();
         actual.CountryId.Should().NotBeEmpty();
         actual.CountryName.Should().Be(input.CountryName);
@@ -87,7 +75,6 @@ public class CountryServiceTests
     {
         var countries = await _countryService.GetAllCountriesAsync();
 
-        // Assert.Empty(countries);
         countries.Should().BeEmpty();
     }
 
@@ -101,11 +88,6 @@ public class CountryServiceTests
 
         var countries = await _countryService.GetAllCountriesAsync();
 
-        // Assert.Equal(2, countries.Count);
-        // var countryNames = countries.Select(c => c.CountryName).ToList();
-        // Assert.Contains(country1.CountryName, countryNames);
-        // Assert.Contains(country2.CountryName, countryNames);
-        
         countries.Should().HaveCount(2);
         countries.Select(c => c.CountryName).Should().Contain(new[] {country1.CountryName, country2.CountryName});
     }
@@ -119,7 +101,6 @@ public class CountryServiceTests
     {
         var country = await _countryService.GetCountryByIdAsync(Guid.NewGuid());
 
-        // Assert.Null(country);
         country.Should().BeNull();
     }
 
@@ -128,7 +109,6 @@ public class CountryServiceTests
     {
         await _countryService.AddCountryAsync(_fixture.Create<CountryAddRequest>());
 
-        // await Assert.ThrowsAsync<ArgumentNullException>(async () => await _countryService.GetCountryByIdAsync(Guid.Empty));
         Func<Task> action = async () => await _countryService.GetCountryByIdAsync(Guid.Empty);
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
@@ -140,7 +120,6 @@ public class CountryServiceTests
 
         var country = await _countryService.GetCountryByIdAsync(Guid.NewGuid());
 
-        // Assert.Null(country);
         country.Should().BeNull();
     }
 
@@ -150,10 +129,6 @@ public class CountryServiceTests
         var countryAdded = await _countryService.AddCountryAsync(_fixture.Create<CountryAddRequest>());
 
         var countryResponse = await _countryService.GetCountryByIdAsync(countryAdded.CountryId);
-
-        // Assert.NotNull(countryResponse);
-        // Assert.Equal(countryAdded.CountryId, countryResponse.CountryId);
-        // Assert.Equal(countryAdded.CountryName, countryResponse.CountryName);
 
         countryResponse.Should().NotBeNull();
         countryResponse?.CountryId.Should().Be(countryAdded.CountryId);
