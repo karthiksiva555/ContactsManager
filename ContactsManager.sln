@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Core", "Con
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Application", "ContactsManager.Application\ContactsManager.Application.csproj", "{C214DB1D-8DEB-45D5-A39E-006482B9FD26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactsManager.Infrastructure", "ContactsManager.Infrastructure\ContactsManager.Infrastructure.csproj", "{9897B658-6443-4A2E-89C2-51F2E8CD939A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C214DB1D-8DEB-45D5-A39E-006482B9FD26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9897B658-6443-4A2E-89C2-51F2E8CD939A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9897B658-6443-4A2E-89C2-51F2E8CD939A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9897B658-6443-4A2E-89C2-51F2E8CD939A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9897B658-6443-4A2E-89C2-51F2E8CD939A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
