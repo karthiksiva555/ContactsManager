@@ -1,27 +1,31 @@
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContactsManager.Infrastructure.Repositories;
 
 public class CountryRepository(ContactsDbContext contactsDbContext) : ICountryRepository
 {
-    public Task<Country> AddCountryAsync(Country countryToAdd)
+    public async Task<Country> AddCountryAsync(Country countryToAdd)
     {
-        throw new NotImplementedException();
+        await contactsDbContext.Countries.AddAsync(countryToAdd);
+        await contactsDbContext.SaveChangesAsync();
+        
+        return countryToAdd;
     }
 
-    public Task<IList<Country>> GetAllCountriesAsync()
+    public async Task<IList<Country>> GetAllCountriesAsync()
     {
-        throw new NotImplementedException();
+        return await contactsDbContext.Countries.ToListAsync();
     }
 
-    public Task<Country?> GetCountryByIdAsync(Guid countryId)
+    public async Task<Country?> GetCountryByIdAsync(Guid countryId)
     {
-        throw new NotImplementedException();
+        return await contactsDbContext.Countries.FirstOrDefaultAsync(c => c.CountryId == countryId);
     }
 
-    public Task<bool> CountryExistsAsync(string countryName)
+    public async Task<bool> CountryExistsAsync(string countryName)
     {
-        throw new NotImplementedException();
+        return await contactsDbContext.Countries.AnyAsync(c => countryName.Equals(c.CountryName, StringComparison.OrdinalIgnoreCase));
     }
 }

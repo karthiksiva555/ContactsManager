@@ -1,12 +1,11 @@
-using ContactsManager.Core.Entities;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Application.DTOs;
-using Microsoft.EntityFrameworkCore;
+using ContactsManager.Core.Interfaces;
 
 namespace ContactsManager.Application.Services;
 
 /// <inheritdoc />
-public class CountryService(ContactsDbContext database) : ICountryService
+public class CountryService(ICountryRepository countryRepository) : ICountryService
 {
     /// <inheritdoc />
     public async Task<CountryResponse> AddCountryAsync(CountryAddRequest countryToAdd)
@@ -18,14 +17,12 @@ public class CountryService(ContactsDbContext database) : ICountryService
             throw new ArgumentException("Country name is required", nameof(countryToAdd.CountryName));
         }
 
-        if (database.Countries.Any(c => c.CountryName == countryToAdd.CountryName))
+        if (await countryRepository.CountryExistsAsync(countryToAdd.CountryName))
         {
             throw new ArgumentException("Country name must be unique", nameof(countryToAdd.CountryName));
         }
         
-        var country = countryToAdd.ToCountry();
-        database.Countries.Add(country);
-        await database.SaveChangesAsync();
+        var country = await countryRepository.AddCountryAsync(countryToAdd.ToCountry());
         return country.ToCountryResponse();
     }
 
@@ -33,7 +30,7 @@ public class CountryService(ContactsDbContext database) : ICountryService
     public async Task<IList<CountryResponse>> GetAllCountriesAsync()
     {
         List<CountryResponse> countries = [];
-        var countriesFromDb = await database.Countries.ToListAsync();
+        var countriesFromDb = await countryRepository.GetAllCountriesAsync();
         countries.AddRange(from country in countriesFromDb
                            select country.ToCountryResponse());
         return countries;
@@ -47,7 +44,7 @@ public class CountryService(ContactsDbContext database) : ICountryService
             throw new ArgumentNullException(nameof(countryId));
         }
 
-        var country = await database.Countries.FirstOrDefaultAsync(c => c.CountryId == countryId);
+        var country = await countryRepository.GetCountryByIdAsync(countryId);
         return country?.ToCountryResponse();
     }
 }

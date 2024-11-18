@@ -19,7 +19,7 @@ public class CountryServiceTests
         DbContextMock<ContactsDbContext> dbContextMock = new(new DbContextOptionsBuilder<ContactsDbContext>().Options);
         dbContextMock.CreateDbSetMock(db => db.Countries, new List<Country>().AsQueryable());
 
-        _countryService = new CountryService(dbContextMock.Object);
+        _countryService = new CountryService(null);
     }
     
     #region AddCountry

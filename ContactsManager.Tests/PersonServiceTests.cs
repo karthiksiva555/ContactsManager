@@ -26,7 +26,7 @@ public class PersonServiceTests
         dbContextMock.CreateDbSetMock(db => db.Countries, new List<Country>().AsQueryable());
         dbContextMock.CreateDbSetMock(db => db.Persons, new List<Person>().AsQueryable());
         
-        _countryService = new CountryService(dbContextMock.Object);
+        _countryService = new CountryService(null);
         _personService = new PersonService(_countryService, dbContextMock.Object);
         _testOutputHelper = testOutputHelper;
     }
