@@ -1,32 +1,49 @@
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContactsManager.Infrastructure.Repositories;
 
-public class PersonRepository : IPersonRepository
+public class PersonRepository(ContactsDbContext contactsDbContext) : IPersonRepository
 {
-    public Task<Person> AddPersonAsync(Person personToAdd)
+    public async Task<Person> AddPersonAsync(Person person)
     {
-        throw new NotImplementedException();
+        await contactsDbContext.Persons.AddAsync(person);
+        await contactsDbContext.SaveChangesAsync();
+        
+        return person;
     }
 
-    public Task<IList<Person>> GetAllPersonsAsync()
+    public async Task<IList<Person>> GetAllPersonsAsync()
     {
-        throw new NotImplementedException();
+        return await contactsDbContext.Persons.Include(p => p.Country).ToListAsync();
     }
 
-    public Task<Person?> GetPersonByIdAsync(Guid personId)
+    public async Task<Person?> GetPersonByIdAsync(Guid personId)
     {
-        throw new NotImplementedException();
+        return await contactsDbContext.Persons.FindAsync(personId);
     }
 
-    public Task<Person> UpdatePersonAsync(Person personToUpdate)
+    public async Task<Person> UpdatePersonAsync(Person person)
     {
-        throw new NotImplementedException();
+        await contactsDbContext.Persons
+            .Where(p => p.PersonId == person.PersonId)
+            .ExecuteUpdateAsync(personToUpdate => personToUpdate // Set properties those you want updated
+                .SetProperty(p => p.PersonName, person.PersonName)
+                .SetProperty(p => p.EmailAddress, person.EmailAddress)
+                .SetProperty(p => p.Gender, person.Gender)
+                .SetProperty(p => p.DateOfBirth, person.DateOfBirth)
+                .SetProperty(p => p.CountryId, person.CountryId)
+            );
+        
+        // check if you need to fetch the entity from the database from scratch
+        return person;
     }
 
-    public Task<bool> DeletePersonAsync(Guid personId)
+    public async Task<bool> DeletePersonAsync(Guid personId)
     {
-        throw new NotImplementedException();
+        var rowsDeleted = await contactsDbContext.Persons.Where(p => p.PersonId == personId).ExecuteDeleteAsync();
+        
+        return rowsDeleted > 0;
     }
 }

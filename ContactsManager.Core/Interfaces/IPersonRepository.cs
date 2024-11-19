@@ -4,7 +4,7 @@ namespace ContactsManager.Core.Interfaces;
 
 public interface IPersonRepository
 {
-    Task<Person> AddPersonAsync(Person personToAdd);
+    Task<Person> AddPersonAsync(Person person);
 
     Task<IList<Person>> GetAllPersonsAsync();
 

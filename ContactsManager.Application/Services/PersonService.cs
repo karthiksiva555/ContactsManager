@@ -4,12 +4,12 @@ using ContactsManager.Application.Helpers;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
-using Microsoft.EntityFrameworkCore;
+using ContactsManager.Core.Interfaces;
 
 namespace ContactsManager.Application.Services;
 
 /// <inheritdoc/>
-public class PersonService(ICountryService countryService, ContactsDbContext contactsDbContext)
+public class PersonService(IPersonRepository personRepository)
     : IPersonService
 {
     private static PersonResponse GetPersonResponse(Person person)
@@ -42,25 +42,8 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
 
         // Model Validation; returns void if object is valid; throws an exception otherwise
         ValidationHelper.Validate(personToAdd);
-
-        var person = personToAdd.ToPerson();
         
-        // Dummy database
-        // _persons.Add(person);
-        
-        // EF Core with SaveChanges
-        await contactsDbContext.Persons.AddAsync(person);
-        await contactsDbContext.SaveChangesAsync();
-        
-        // EF Core with Stored procedure
-        // var result = contactsDbContext.InsertPerson(person);
-        // if (result == 0)
-        // {
-        //     throw new Exception("Person could not be added.");
-        // }
-        
-        var addedPerson = await contactsDbContext.Persons.Include(p => p.Country).FirstOrDefaultAsync(p => p.PersonId == person.PersonId);
-        
+        var addedPerson = await personRepository.AddPersonAsync(personToAdd.ToPerson());
         return GetPersonResponse(addedPerson);
     }
 
@@ -68,8 +51,7 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
     public async Task<IList<PersonResponse>> GetAllPersonsAsync()
     {
         List<PersonResponse> persons = [];
-        var personsFromDb = await contactsDbContext.Persons.Include(p => p.Country).ToListAsync();
-        //var personsFromDb = contactsDbContext.FunctionGetAllPersons();
+        var personsFromDb = await personRepository.GetAllPersonsAsync();
         persons.AddRange(from person in personsFromDb select GetPersonResponse(person));
         return persons;
     }
@@ -82,7 +64,7 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
             throw new ArgumentNullException(nameof(personId));
         }
 
-        var person = await contactsDbContext.Persons.FirstOrDefaultAsync(p => p.PersonId == personId);
+        var person = await personRepository.GetPersonByIdAsync(personId);
         return person!=null ? GetPersonResponse(person) : null;
     }
 
@@ -141,25 +123,27 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
         // Perform all model validations
         ValidationHelper.Validate(personToUpdate);
         
-        var existingPerson = await contactsDbContext.Persons.FirstOrDefaultAsync(p => p.PersonId == personToUpdate.PersonId);
+        var existingPerson = await personRepository.GetPersonByIdAsync(personToUpdate.PersonId);
         if (existingPerson == null)
         {
             throw new ArgumentException("Invalid argument supplied", nameof(personToUpdate.PersonId));
         }
         
-        // Any change to the existing entity will mark it as EntityStateModified = true
-        existingPerson.PersonName = personToUpdate.PersonName;
-        existingPerson.CountryId = personToUpdate.CountryId;
-        existingPerson.EmailAddress = personToUpdate.EmailAddress;
-        if (!string.IsNullOrEmpty(personToUpdate.Gender) &&
-            Enum.TryParse<Gender>(personToUpdate.Gender, out var gender))
-            existingPerson.Gender = gender;
-        existingPerson.DateOfBirth = personToUpdate.DateOfBirth;
-
-        // Generates UPDATE statement for all rows with EntityStateModified = true
-        await contactsDbContext.SaveChangesAsync();
+        var person = await personRepository.UpdatePersonAsync(personToUpdate.ToPerson());
         
-        return existingPerson.ToPersonResponse();
+        // Any change to the existing entity will mark it as EntityStateModified = true
+        // existingPerson.PersonName = personToUpdate.PersonName;
+        // existingPerson.CountryId = personToUpdate.CountryId;
+        // existingPerson.EmailAddress = personToUpdate.EmailAddress;
+        // if (!string.IsNullOrEmpty(personToUpdate.Gender) &&
+        //     Enum.TryParse<Gender>(personToUpdate.Gender, out var gender))
+        //     existingPerson.Gender = gender;
+        // existingPerson.DateOfBirth = personToUpdate.DateOfBirth;
+        //
+        // // Generates UPDATE statement for all rows with EntityStateModified = true
+        // await contactsDbContext.SaveChangesAsync();
+        
+        return person.ToPersonResponse();
     }
 
     /// <inheritdoc/>
@@ -170,14 +154,11 @@ public class PersonService(ICountryService countryService, ContactsDbContext con
             throw new ArgumentException("Invalid argument supplied", nameof(personId));
         }
         
-        var existingPerson = await contactsDbContext.Persons.FirstOrDefaultAsync(p => p.PersonId == personId);
+        var existingPerson = await personRepository.GetPersonByIdAsync(personId);
 
         if (existingPerson == null)
             return false;
         
-        contactsDbContext.Persons.Remove(existingPerson);
-        await contactsDbContext.SaveChangesAsync();
-        
-        return true;
+        return await personRepository.DeletePersonAsync(personId);
     }
 }
