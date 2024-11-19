@@ -3,31 +3,25 @@ using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
-using EntityFrameworkCoreMock;
+using ContactsManager.Core.Interfaces;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit.Abstractions;
 
 namespace ContactsManager.Tests;
 
 public class PersonServiceTests
 {
-    private readonly CountryService _countryService;
     private readonly PersonService _personService;
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly Fixture _fixture;
+    private readonly Mock<IPersonRepository> _personRepositoryMock;
 
     public PersonServiceTests(ITestOutputHelper testOutputHelper)
     {
         _fixture = new Fixture();
-        
-        DbContextMock<ContactsDbContext> dbContextMock = new(new DbContextOptionsBuilder<ContactsDbContext>().Options);
-        
-        dbContextMock.CreateDbSetMock(db => db.Countries, new List<Country>().AsQueryable());
-        dbContextMock.CreateDbSetMock(db => db.Persons, new List<Person>().AsQueryable());
-        
-        _countryService = new CountryService(null);
-        _personService = new PersonService(null);
+        _personRepositoryMock = new Mock<IPersonRepository>();
+        _personService = new PersonService(_personRepositoryMock.Object);
         _testOutputHelper = testOutputHelper;
     }
 
@@ -61,6 +55,7 @@ public class PersonServiceTests
     public async Task AddPersonAsync_InputIsNull_ThrowsArgumentNullException()
     {
         Func<Task> action = async () => await _personService.AddPersonAsync(null!);
+        
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
 
@@ -71,6 +66,7 @@ public class PersonServiceTests
             .With(p => p.PersonName, null as string).Create();
 
         Func<Task> action = async () => await _personService.AddPersonAsync(personToAdd);
+        
         await action.Should().ThrowAsync<ArgumentException>();
     }
 
@@ -92,9 +88,10 @@ public class PersonServiceTests
         var personToAdd = _fixture.Build<PersonAddRequest>()
             .With(p => p.EmailAddress, "test@test.com").Create();
         
-        _testOutputHelper.WriteLine("Calling the Add Person method");
+        _testOutputHelper.WriteLine("Mocking the Add Person method in repository");
+        _personRepositoryMock.Setup(p => p.AddPersonAsync(It.IsAny<Person>())).ReturnsAsync(personToAdd.ToPerson());
+        
         var addedPerson = await _personService.AddPersonAsync(personToAdd);
-
         // Unit Testing navigation props is not easy in EF Core
         // This will fail as the person entity won't fetch Country object even with .Include() on Person fetch
         //Assert.Equal(countryResponse?.CountryName, addedPerson.Country);
@@ -112,6 +109,8 @@ public class PersonServiceTests
     [Fact]
     public async Task GetAllPersons_BeforeInitialization_ContainsEmptyList()
     {
+        _personRepositoryMock.Setup(p => p.GetAllPersonsAsync()).ReturnsAsync(new List<Person>());
+        
         var persons = await _personService.GetAllPersonsAsync();
 
         persons.Should().BeEmpty();
@@ -124,8 +123,8 @@ public class PersonServiceTests
             .With(p => p.EmailAddress, "test1@test.com").Create();
         var person2=_fixture.Build<PersonAddRequest>()
             .With(p => p.EmailAddress, "test2@test.com").Create();
-        await _personService.AddPersonAsync(person1);
-        await _personService.AddPersonAsync(person2);
+        var personList = new List<Person> { person1.ToPerson(), person2.ToPerson() };
+        _personRepositoryMock.Setup(p => p.GetAllPersonsAsync()).ReturnsAsync(personList);
 
         var persons = await _personService.GetAllPersonsAsync();
         
@@ -149,6 +148,8 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_PersonListIsEmpty_ReturnsNull()
     {
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(null as Person);
+        
         var person = await _personService.GetPersonByIdAsync(Guid.NewGuid());
 
         person.Should().BeNull();
@@ -157,9 +158,7 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_NoMatchingPersonFound_ReturnsNull()
     {
-        var personToAdd = _fixture.Build<PersonAddRequest>()
-            .With(p => p.EmailAddress, "test@test.com").Create();
-        await _personService.AddPersonAsync(personToAdd);
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(null as Person);
 
         var person = await _personService.GetPersonByIdAsync(Guid.NewGuid());
 
@@ -169,15 +168,15 @@ public class PersonServiceTests
     [Fact]
     public async Task GetPersonById_MatchingPersonFound_ReturnsMatchingPerson()
     {
-        var personToAdd = _fixture.Build<PersonAddRequest>()
+        var personToAdd = _fixture.Build<Person>()
             .With(p => p.EmailAddress, "test@test.com").Create();
-        var personAdded = await _personService.AddPersonAsync(personToAdd);
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(personToAdd);
         
-        var person = await _personService.GetPersonByIdAsync(personAdded.PersonId);
+        var person = await _personService.GetPersonByIdAsync(personToAdd.PersonId);
 
         person.Should().NotBeNull();
-        person?.PersonName.Should().Be(personAdded.PersonName);
-        person?.PersonId.Should().Be(personAdded.PersonId);
+        person?.PersonName.Should().Be(personToAdd.PersonName);
+        person?.PersonId.Should().Be(personToAdd.PersonId);
     }
 
     #endregion
@@ -198,7 +197,8 @@ public class PersonServiceTests
     [Fact]
     public async Task GetFilteredPersons_PersonListIsEmpty_ReturnsEmptyList()
     {
-        // Person list is empty in the beginning
+        _personRepositoryMock.Setup(p => p.GetAllPersonsAsync()).ReturnsAsync(new List<Person>());
+        
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "Si");
         
         filteredPersons.Should().BeEmpty();
@@ -207,15 +207,14 @@ public class PersonServiceTests
     [Fact]
     public async Task GetFilteredPersons_EmptySearchString_ReturnsAllPersons()
     {
-        var person1 = _fixture.Build<PersonAddRequest>()
+        var person1 = _fixture.Build<Person>()
             .With(p => p.EmailAddress, "test1@test.com").Create();
-        var person2 = _fixture.Build<PersonAddRequest>()
+        var person2 = _fixture.Build<Person>()
             .With(p => p.EmailAddress, "test2@test.com").Create();
-        var person3 = _fixture.Build<PersonAddRequest>()
+        var person3 = _fixture.Build<Person>()
             .With(p => p.EmailAddress, "test3@test.com").Create();
-        await _personService.AddPersonAsync(person1);
-        await _personService.AddPersonAsync(person2);
-        await _personService.AddPersonAsync(person3);
+        var personList = new List<Person> { person1, person2, person3 };
+        _personRepositoryMock.Setup(p => p.GetAllPersonsAsync()).ReturnsAsync(personList);
         
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "");
         
@@ -229,18 +228,17 @@ public class PersonServiceTests
     [Fact]
     public async Task GetFilteredPersons_SearchStringIsValid_ReturnsFilteredPersons()
     {
-        var person1 = _fixture.Build<PersonAddRequest>()
+        var person1 = _fixture.Build<Person>()
             .With(p => p.PersonName, "Ram")
             .With(p => p.EmailAddress, "test1@test.com").Create();
-        var person2 = _fixture.Build<PersonAddRequest>()
+        var person2 = _fixture.Build<Person>()
             .With(p => p.PersonName, "rahim")
             .With(p => p.EmailAddress, "test2@test.com").Create();
-        var person3 = _fixture.Build<PersonAddRequest>()
+        var person3 = _fixture.Build<Person>()
             .With(p => p.PersonName, "Robert")
             .With(p => p.EmailAddress, "test3@test.com").Create();
-        await _personService.AddPersonAsync(person1);
-        await _personService.AddPersonAsync(person2);
-        await _personService.AddPersonAsync(person3);
+        var personList = new List<Person> { person1, person2, person3 };
+        _personRepositoryMock.Setup(p => p.GetAllPersonsAsync()).ReturnsAsync(personList);
         
         var filteredPersons = await _personService.GetFilteredPersonsAsync("PersonName", "ra");
         
@@ -332,22 +330,18 @@ public class PersonServiceTests
     public async Task UpdatePerson_PersonIdIsNull_ThrowsArgumentException()
     {
         var personUpdateRequest = _fixture.Build<PersonUpdateRequest>()
+            .With(p => p.PersonId, Guid.Empty)
             .With(p => p.EmailAddress, "test@test.com").Create();
         
         Func<Task> action = async () => await _personService.UpdatePersonAsync(personUpdateRequest);
         
-        await action.Should().ThrowAsync<ArgumentException>();
+        await action.Should().ThrowAsync<ArgumentException>().WithMessage("Person Id cannot be blank (Parameter 'PersonId')");
     }
 
     [Fact]
     public async Task UpdatePerson_PersonIdDoesNotExist_ThrowsArgumentException()
     {
-        var person1 = _fixture.Build<PersonAddRequest>()
-            .With(p => p.EmailAddress, "test1@test.com").Create();
-        var person2 = _fixture.Build<PersonAddRequest>()
-            .With(p => p.EmailAddress, "test2@test.com").Create();
-        await _personService.AddPersonAsync(person1);
-        await _personService.AddPersonAsync(person2);
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(null as Person);
         
         var personToUpdate = _fixture.Build<PersonUpdateRequest>().With(p => p.EmailAddress, "test3@test.com").Create();
 
@@ -359,24 +353,17 @@ public class PersonServiceTests
     [Fact]
     public async Task UpdatePerson_ValidPersonUpdateRequest_PersonIsUpdated()
     {
-        var personAddRequest1 = _fixture.Build<PersonAddRequest>()
-            .With(p => p.EmailAddress, "test1@test.com").Create();
-        var personAddRequest2 = _fixture.Build<PersonAddRequest>()
-            .With(p => p.EmailAddress, "test2@test.com").Create();
-        var person1 = await _personService.AddPersonAsync(personAddRequest1);
-        await _personService.AddPersonAsync(personAddRequest2);
+        var personUpdateRequest = _fixture.Build<PersonUpdateRequest>()
+            .With(p => p.EmailAddress, "test1@test.com")
+            .With(p => p.Gender, "Male")
+            .Create();
+        var person = personUpdateRequest.ToPerson();
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(person);
+        _personRepositoryMock.Setup(p => p.UpdatePersonAsync(It.IsAny<Person>())).ReturnsAsync(person);
         
-        var personToUpdate = _fixture.Build<PersonUpdateRequest>()
-            .With(p => p.PersonId, person1.PersonId)
-            .With(p => p.PersonName, "Updated Name")
-            .With(p => p.EmailAddress, "test3@test.com").Create();
+        var updatedPerson = await _personService.UpdatePersonAsync(personUpdateRequest);
         
-        var updatedPerson = await _personService.UpdatePersonAsync(personToUpdate);
-        
-        updatedPerson.PersonName.Should().Be(personToUpdate.PersonName);
-        var person = await _personService.GetPersonByIdAsync(person1.PersonId);
-        person.Should().NotBeNull();
-        person?.PersonName.Should().Be(personToUpdate.PersonName);
+        updatedPerson.PersonName.Should().Be(personUpdateRequest.PersonName);
     }
     
     #endregion
@@ -394,9 +381,7 @@ public class PersonServiceTests
     [Fact]
     public async Task DeletePerson_PersonIdDoesNotExistInList_ReturnsFalse()
     {
-        var personToAdd = _fixture.Build<PersonAddRequest>()
-            .With(p => p.EmailAddress, "test1@test.com").Create();
-        await _personService.AddPersonAsync(personToAdd);
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(null as Person);
         
         var result = await _personService.DeletePersonAsync(Guid.NewGuid());
         
@@ -408,13 +393,12 @@ public class PersonServiceTests
     {
         var personToAdd = _fixture.Build<PersonAddRequest>()
             .With(p => p.EmailAddress, "test1@test.com").Create();
-        var person1 = await _personService.AddPersonAsync(personToAdd);
+        _personRepositoryMock.Setup(p => p.GetPersonByIdAsync(It.IsAny<Guid>())).ReturnsAsync(personToAdd.ToPerson());
+        _personRepositoryMock.Setup(p => p.DeletePersonAsync(It.IsAny<Guid>())).ReturnsAsync(true);
         
-        var result = await _personService.DeletePersonAsync(person1.PersonId);
+        var result = await _personService.DeletePersonAsync(Guid.NewGuid());
         
         result.Should().BeTrue();
-        var person = await _personService.GetPersonByIdAsync(person1.PersonId);
-        person.Should().BeNull();
     }
     
     #endregion
