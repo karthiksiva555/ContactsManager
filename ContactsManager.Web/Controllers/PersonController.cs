@@ -54,17 +54,17 @@ public class PersonController(IPersonService personService, ICountryService coun
 
     [Route("create")]
     [HttpPost]
-    public async Task<IActionResult> CreateAsync(PersonAddRequest personTAdd)
+    public async Task<IActionResult> CreateAsync(PersonAddRequest personToAdd)
     {
         if (!ModelState.IsValid)
         {
             ViewBag.Countries = await GetCountriesForDropdownAsync();
             ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             
-            return View();
+            return View(personToAdd);
         }
 
-        await personService.AddPersonAsync(personTAdd);
+        await personService.AddPersonAsync(personToAdd);
         return RedirectToAction("Index", "Person");
     }
 
