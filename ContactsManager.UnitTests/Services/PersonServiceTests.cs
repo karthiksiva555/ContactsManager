@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using Xunit.Abstractions;
 
-namespace ContactsManager.Tests.Services;
+namespace ContactsManager.UnitTests.Services;
 
 public class PersonServiceTests
 {

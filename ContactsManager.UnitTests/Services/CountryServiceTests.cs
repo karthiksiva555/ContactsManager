@@ -6,7 +6,7 @@ using ContactsManager.Core.Interfaces;
 using FluentAssertions;
 using Moq;
 
-namespace ContactsManager.Tests.Services;
+namespace ContactsManager.UnitTests.Services;
 
 public class CountryServiceTests
 {

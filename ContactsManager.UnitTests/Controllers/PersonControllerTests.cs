@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace ContactsManager.Tests.Controllers;
+namespace ContactsManager.UnitTests.Controllers;
 
 public class PersonControllerTests
 {
