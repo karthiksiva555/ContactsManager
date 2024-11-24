@@ -23,3 +23,6 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.MapControllers();
 app.Run();
+
+// To make the Program class available in Integration tests
+public partial class Program { }
