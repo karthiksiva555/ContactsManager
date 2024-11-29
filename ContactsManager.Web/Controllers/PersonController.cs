@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace ContactsManager.Web.Controllers;
 
 [Route("[controller]")]
-public class PersonController(IPersonService personService, ICountryService countryService) : Controller
+public class PersonController(IPersonService personService, ICountryService countryService, ILogger<PersonController> logger) : Controller
 {
     private async Task<IEnumerable<SelectListItem>> GetCountriesForDropdownAsync()
     {
@@ -19,6 +19,10 @@ public class PersonController(IPersonService personService, ICountryService coun
     [Route("/")]
     public async Task<IActionResult> IndexAsync(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
     {
+        logger.LogInformation("Calling the Index action method in PersonController");
+        
+        logger.LogDebug("Search By: {searchBy}, searchString: {searchString}, sortBy: {sortBy}", searchBy, searchString, sortBy);
+        
         ViewBag.SearchFields = new Dictionary<string, string>()
         {
             {nameof(PersonResponse.PersonName), "Person Name"},
