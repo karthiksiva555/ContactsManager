@@ -5,6 +5,7 @@ using ContactsManager.Core.Enums;
 using ContactsManager.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace ContactsManager.UnitTests.Controllers;
@@ -13,6 +14,7 @@ public class PersonControllerTests
 {
     private readonly Mock<IPersonService> _personServiceMock;
     private readonly Mock<ICountryService> _countryServiceMock;
+    private readonly Mock<ILogger<PersonController>> _loggerMock;
     private readonly PersonController _personController;
     private readonly IFixture _fixture;
     
@@ -20,8 +22,9 @@ public class PersonControllerTests
     {
         _countryServiceMock = new Mock<ICountryService>();
         _personServiceMock = new Mock<IPersonService>();
+        _loggerMock = new Mock<ILogger<PersonController>>();
         _fixture = new Fixture();
-        _personController = new PersonController(_personServiceMock.Object, _countryServiceMock.Object);
+        _personController = new PersonController(_personServiceMock.Object, _countryServiceMock.Object, _loggerMock.Object);
     }
 
     [Fact]
