@@ -5,6 +5,7 @@ using ContactsManager.Infrastructure;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Serilog.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,9 @@ builder.Services.AddHttpLogging(options =>
     // Log all fields
     // options.LoggingFields = HttpLoggingFields.All;
     // Log only request properties and response headers
-    options.LoggingFields = HttpLoggingFields.RequestProperties | HttpLoggingFields.ResponseBody;
+    // options.LoggingFields = HttpLoggingFields.RequestProperties | HttpLoggingFields.ResponseBody;
+
+    options.LoggingFields = HttpLoggingFields.RequestProperties | HttpLoggingFields.ResponsePropertiesAndHeaders;
 });
 
 builder.Host.UseSerilog((context, services, configuration) =>
@@ -28,8 +31,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
         .ReadFrom.Configuration(context.Configuration)
         // let serilog access our DI container
         .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .WriteTo.Console();
+        .Enrich.FromLogContext();
 });
 
 //DI Container

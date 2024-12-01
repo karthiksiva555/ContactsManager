@@ -3,6 +3,7 @@ using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SerilogTimings;
 
 namespace ContactsManager.Web.Controllers;
 
@@ -38,7 +39,12 @@ public class PersonController(IPersonService personService, ICountryService coun
         // Retain sortBy and sortOrder across page loads
         ViewBag.SortBy = sortBy;
         ViewBag.SortOrder = sortOrder.ToString();
-        
+
+        // IList<PersonResponse> filteredPersons;
+        // using (Operation.Time("Fetching persons from database"))
+        // {
+        //     filteredPersons = await personService.GetFilteredPersonsAsync(searchBy ?? nameof(PersonResponse.PersonName), searchString);
+        // }
         // Get filtered persons
         var filteredPersons = await personService.GetFilteredPersonsAsync(searchBy ?? nameof(PersonResponse.PersonName), searchString);
         
