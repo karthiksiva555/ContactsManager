@@ -33,4 +33,10 @@
     <ItemGroup>
       <Folder Include="Logs\" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <None Remove="Logs\log2024113019.txt" />
+      <None Remove="Logs\log2024113018.txt" />
+      <None Remove="Logs\log2024113017.txt" />
+    </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@ using ContactsManager.Application.Interfaces;
 using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
 using ContactsManager.Infrastructure;
+using ContactsManager.Web.Filters.Action;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -13,7 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Logging.ClearProviders();
 // builder.Logging.AddConsole();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<LogAction>();
+    // options.Filters.Add<ResponseHeaderAddAction>();
+    var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<ResponseHeaderAddAction>>();
+    options.Filters.Add(new ResponseHeaderAddAction(logger, "X-App-Key", "app-global", 1));
+});
+
 builder.Services.AddHttpLogging(options =>
 {
     // Log all fields
