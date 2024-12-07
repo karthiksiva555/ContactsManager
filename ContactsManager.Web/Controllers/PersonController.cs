@@ -3,6 +3,7 @@ using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Enums;
 using ContactsManager.Web.Filters.Action;
 using ContactsManager.Web.Filters.Authorization;
+using ContactsManager.Web.Filters.Exception;
 using ContactsManager.Web.Filters.Resource;
 using ContactsManager.Web.Filters.Result;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,7 @@ public class PersonController(IPersonService personService, ICountryService coun
     [TypeFilter(typeof(AppNameResourceFilter))]
     [TypeFilter(typeof(SessionAuthorizationFilter))]
     [TypeFilter(typeof(XmlToJsonResultFilter))]
+    [TypeFilter(typeof(HandleExceptionFilter))]
     public async Task<IActionResult> IndexAsync(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
     {
         logger.LogInformation("Calling the Index action method in PersonController");
