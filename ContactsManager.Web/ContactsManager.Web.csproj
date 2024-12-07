@@ -38,5 +38,10 @@
       <None Remove="Logs\log2024113019.txt" />
       <None Remove="Logs\log2024113018.txt" />
       <None Remove="Logs\log2024113017.txt" />
+      <None Remove="Logs\log2024120122.txt" />
+      <None Remove="Logs\log2024120115.txt" />
+      <None Remove="Logs\log2024120112.txt" />
+      <None Remove="Logs\log2024120111.txt" />
+      <None Remove="Logs\log2024120109.txt" />
     </ItemGroup>
 </Project>
