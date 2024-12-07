@@ -2,6 +2,7 @@ using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Interfaces;
 using ContactsManager.Core.Enums;
 using ContactsManager.Web.Filters.Action;
+using ContactsManager.Web.Filters.Resource;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -26,6 +27,7 @@ public class PersonController(IPersonService personService, ICountryService coun
     [TypeFilter(typeof(LogActionAsync))]
     [TypeFilter(typeof(ResponseHeaderAddAction), Arguments = ["X-Action-Name", "Person.Index", 2])]
     [TypeFilter(typeof(ValidateRequestHeaderAction), Arguments = ["x-app-name"])]
+    [TypeFilter(typeof(AppNameResourceFilter))]
     public async Task<IActionResult> IndexAsync(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
     {
         logger.LogInformation("Calling the Index action method in PersonController");
