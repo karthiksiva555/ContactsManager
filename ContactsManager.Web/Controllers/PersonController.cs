@@ -27,8 +27,9 @@ public class PersonController(IPersonService personService, ICountryService coun
     
     [Route("index")]
     [Route("/")]
-    [TypeFilter(typeof(LogActionAsync))]
-    // [TypeFilter(typeof(ResponseHeaderAddAction), Arguments = ["X-Action-Name", "Person.Index", 2])]
+    [ServiceFilter(typeof(LogActionAsync))]
+    [TypeFilter(typeof(ResponseHeaderAddAction), 
+        Arguments = ["X-Action-Name", "Person.Index", 2])]
     // [TypeFilter(typeof(ValidateRequestHeaderAction), Arguments = ["x-app-name"])]
     [TypeFilter(typeof(AppNameResourceFilter))]
     [TypeFilter(typeof(SessionAuthorizationFilter))]
