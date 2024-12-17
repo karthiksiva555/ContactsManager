@@ -28,18 +28,18 @@ public class PersonController(IPersonService personService, ICountryService coun
     [Route("index")]
     [Route("/")]
     [ServiceFilter(typeof(LogActionAsync))]
-    [TypeFilter(typeof(ResponseHeaderAddAction), 
-        Arguments = ["X-Action-Name", "Person.Index", 2])]
     // [TypeFilter(typeof(ValidateRequestHeaderAction), Arguments = ["x-app-name"])]
     [TypeFilter(typeof(AppNameResourceFilter))]
     [TypeFilter(typeof(SessionAuthorizationFilter))]
     [TypeFilter(typeof(XmlToJsonResultFilter))]
     [TypeFilter(typeof(HandleExceptionFilter))]
-    //[TypeFilter(typeof(FormatResultFilter))]
-    [ValidateHeaderActionFilter("x-app-name")]
+    // [TypeFilter(typeof(FormatResultFilter))]
+    // [ValidateHeaderActionFilter("x-app-name")]
     // [CustomActionFilter]
     // [CustomResultFilter]
     // [CustomExceptionFilter]
+    [TypeFilter(typeof(ResponseHeaderAddAction), Arguments = ["X-Action-Name", "Person.Index", 2])]
+    [AddHeaderActionFilterFactory("x-custom-name", "custom-value", 3)]
     public async Task<IActionResult> IndexAsync(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
     {
         logger.LogInformation("Calling the Index action method in PersonController");

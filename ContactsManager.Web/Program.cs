@@ -52,6 +52,8 @@ builder.Services.AddDbContext<ContactsDbContext>(options => options.UseNpgsql(bu
 // To be able to call the filter with ServiceFilter instead of TypeFilter
 builder.Services.AddTransient<LogActionAsync>();
 
+builder.Services.AddTransient<AddHeaderActionFilter>();
+
 var app = builder.Build();
 
 // Sample log messages
