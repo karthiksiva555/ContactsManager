@@ -37,6 +37,9 @@ public class PersonController(IPersonService personService, ICountryService coun
     [TypeFilter(typeof(HandleExceptionFilter))]
     //[TypeFilter(typeof(FormatResultFilter))]
     [ValidateHeaderActionFilter("x-app-name")]
+    // [CustomActionFilter]
+    // [CustomResultFilter]
+    // [CustomExceptionFilter]
     public async Task<IActionResult> IndexAsync(string? searchBy, string? searchString = null, string sortBy = nameof(PersonResponse.PersonName), SortOrder sortOrder = SortOrder.Asc)
     {
         logger.LogInformation("Calling the Index action method in PersonController");
