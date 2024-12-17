@@ -2,6 +2,7 @@ using ContactsManager.Application.Interfaces;
 using ContactsManager.Application.Services;
 using ContactsManager.Core.Entities;
 using ContactsManager.Infrastructure;
+using ContactsManager.Web.Extensions;
 using ContactsManager.Web.Filters.Action;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
@@ -14,24 +15,6 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Logging.ClearProviders();
 // builder.Logging.AddConsole();
 
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add<LogAction>();
-    // options.Filters.Add<ResponseHeaderAddAction>();
-    var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<ResponseHeaderAddAction>>();
-    options.Filters.Add(new ResponseHeaderAddAction(logger, "X-App-Key", "app-global", 1));
-});
-
-builder.Services.AddHttpLogging(options =>
-{
-    // Log all fields
-    // options.LoggingFields = HttpLoggingFields.All;
-    // Log only request properties and response headers
-    // options.LoggingFields = HttpLoggingFields.RequestProperties | HttpLoggingFields.ResponseBody;
-
-    options.LoggingFields = HttpLoggingFields.RequestProperties | HttpLoggingFields.ResponsePropertiesAndHeaders;
-});
-
 builder.Host.UseSerilog((context, services, configuration) =>
 {
     configuration
@@ -42,17 +25,8 @@ builder.Host.UseSerilog((context, services, configuration) =>
         .Enrich.FromLogContext();
 });
 
-//DI Container
-builder.Services.AddScoped<ICountryService, CountryService>();
-builder.Services.AddScoped<IPersonService, PersonService>();
-builder.Services.AddInfrastructure();
-
-builder.Services.AddDbContext<ContactsDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnectionString")));
-
-// To be able to call the filter with ServiceFilter instead of TypeFilter
-builder.Services.AddTransient<LogActionAsync>();
-
-builder.Services.AddTransient<AddHeaderActionFilter>();
+// Delegate all the services to an extension method
+builder.Services.ConfigureServices(builder.Configuration);
 
 var app = builder.Build();
 
