@@ -16,17 +16,20 @@ public class ExceptionHandlingMiddleware (RequestDelegate next, ILogger<Exceptio
             var exception = ex.InnerException ?? ex;
             logger.LogError("{exception} - {message}", exception, exception.Message);
             
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            // Give a friendly message to the user.
-            await context.Response.WriteAsync("An unhandled exception occurred. Try again later.");
+            // Commented to let UseExceptionHandler middleware to handle the error
+            // context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            // // Give a friendly message to the user.
+            // await context.Response.WriteAsync("An unhandled exception occurred. Try again later.");
+
+            throw;
         }
     }    
 }
 
 public static class ExceptionHandlingMiddlewareExtensions
 {
-    public static IApplicationBuilder UseExceptionHandlingMiddleware(this IApplicationBuilder builder)
+    public static void UseCustomExceptionHandling(this IApplicationBuilder builder)
     {
-        return builder.UseMiddleware<ExceptionHandlingMiddleware>();
+        builder.UseMiddleware<ExceptionHandlingMiddleware>();
     }
 }

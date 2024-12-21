@@ -14,7 +14,7 @@ public static class ConfigureServicesExtensions
     {
         services.AddControllersWithViews(options =>
         {
-            options.Filters.Add<LogAction>();
+            // options.Filters.Add<LogAction>();
             // options.Filters.Add<ResponseHeaderAddAction>();
             // var logger = services.BuildServiceProvider().GetRequiredService<ILogger<ResponseHeaderAddAction>>();
             // options.Filters.Add(new ResponseHeaderAddAction(logger, "X-App-Key", "app-global", 1));

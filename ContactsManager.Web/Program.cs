@@ -44,8 +44,12 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandlingMiddleware();
+    app.UseExceptionHandler("/error");
+    app.UseCustomExceptionHandling();
 }
+
+// To redirect the user to a status code specific error page
+// app.UseStatusCodePagesWithRedirects("/error/{0}");
 
 app.UseHttpLogging();
 app.UseSerilogRequestLogging();
