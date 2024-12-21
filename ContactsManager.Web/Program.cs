@@ -4,6 +4,7 @@ using ContactsManager.Core.Entities;
 using ContactsManager.Infrastructure;
 using ContactsManager.Web.Extensions;
 using ContactsManager.Web.Filters.Action;
+using ContactsManager.Web.Middleware;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -40,6 +41,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandlingMiddleware();
 }
 
 app.UseHttpLogging();

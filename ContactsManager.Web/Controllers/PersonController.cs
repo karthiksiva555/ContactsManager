@@ -32,7 +32,7 @@ public class PersonController(IPersonService personService, ICountryService coun
     [TypeFilter(typeof(AppNameResourceFilter))]
     [TypeFilter(typeof(SessionAuthorizationFilter))]
     [TypeFilter(typeof(XmlToJsonResultFilter))]
-    [TypeFilter(typeof(HandleExceptionFilter))]
+    // [TypeFilter(typeof(HandleExceptionFilter))]
     // [TypeFilter(typeof(FormatResultFilter))]
     // [ValidateHeaderActionFilter("x-app-name")]
     // [CustomActionFilter]
