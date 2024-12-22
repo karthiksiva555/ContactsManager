@@ -1,8 +1,9 @@
+using ContactsManager.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace ContactsManager.Core.Entities;
+namespace ContactsManager.Infrastructure.DbContext;
 
-public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : DbContext(options)
+public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : Microsoft.EntityFrameworkCore.DbContext(options)
 {
     public virtual DbSet<Country> Countries { get; set; }
 

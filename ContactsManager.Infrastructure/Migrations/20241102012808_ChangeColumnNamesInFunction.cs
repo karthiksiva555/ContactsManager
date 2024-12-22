@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ContactsManager.Core.Migrations
+namespace ContactsManager.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class ChangeColumnNamesInFunction : Migration

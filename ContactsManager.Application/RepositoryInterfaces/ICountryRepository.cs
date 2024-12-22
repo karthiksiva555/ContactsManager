@@ -1,6 +1,6 @@
 using ContactsManager.Core.Entities;
 
-namespace ContactsManager.Core.Interfaces;
+namespace ContactsManager.Application.RepositoryInterfaces;
 
 public interface ICountryRepository
 { 

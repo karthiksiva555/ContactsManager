@@ -1,6 +1,6 @@
 using AutoFixture;
 using ContactsManager.Application.DTOs;
-using ContactsManager.Application.Interfaces;
+using ContactsManager.Application.ServiceInterfaces;
 using ContactsManager.Core.Enums;
 using ContactsManager.Web.Controllers;
 using FluentAssertions;

@@ -1,7 +1,7 @@
 using ContactsManager.Application.DTOs;
 using ContactsManager.Core.Enums;
 
-namespace ContactsManager.Application.Interfaces;
+namespace ContactsManager.Application.ServiceInterfaces;
 
 /// <summary>
 /// Provides an inteface to perform CRUD operations on the Person entity.

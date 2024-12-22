@@ -1,10 +1,10 @@
 using System.Reflection;
 using ContactsManager.Application.DTOs;
 using ContactsManager.Application.Helpers;
-using ContactsManager.Application.Interfaces;
+using ContactsManager.Application.ServiceInterfaces;
 using ContactsManager.Core.Entities;
 using ContactsManager.Core.Enums;
-using ContactsManager.Core.Interfaces;
+using ContactsManager.Application.RepositoryInterfaces;
 
 namespace ContactsManager.Application.Services;
 

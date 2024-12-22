@@ -1,4 +1,4 @@
-using ContactsManager.Core.Entities;
+using ContactsManager.Infrastructure.DbContext;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;

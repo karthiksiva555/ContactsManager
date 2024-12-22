@@ -1,14 +1,6 @@
-using ContactsManager.Application.Interfaces;
-using ContactsManager.Application.Services;
-using ContactsManager.Core.Entities;
-using ContactsManager.Infrastructure;
 using ContactsManager.Web.Extensions;
-using ContactsManager.Web.Filters.Action;
 using ContactsManager.Web.Middleware;
-using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

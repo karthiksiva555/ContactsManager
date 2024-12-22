@@ -1,6 +1,6 @@
 using ContactsManager.Application.DTOs;
 
-namespace ContactsManager.Application.Interfaces;
+namespace ContactsManager.Application.ServiceInterfaces;
 
 public interface ICountryService
 {

@@ -1,4 +1,4 @@
-using ContactsManager.Core.Interfaces;
+using ContactsManager.Application.RepositoryInterfaces;
 using ContactsManager.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,7 +1,7 @@
-using ContactsManager.Application.Interfaces;
+using ContactsManager.Application.ServiceInterfaces;
 using ContactsManager.Application.Services;
-using ContactsManager.Core.Entities;
 using ContactsManager.Infrastructure;
+using ContactsManager.Infrastructure.DbContext;
 using ContactsManager.Web.Filters.Action;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;

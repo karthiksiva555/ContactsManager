@@ -4,7 +4,7 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ContactsManager.Core.Migrations
+namespace ContactsManager.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class ConvertCountrySeedToUseConstantIds : Migration

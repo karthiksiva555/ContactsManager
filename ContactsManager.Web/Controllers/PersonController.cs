@@ -1,15 +1,12 @@
 using ContactsManager.Application.DTOs;
-using ContactsManager.Application.Interfaces;
+using ContactsManager.Application.ServiceInterfaces;
 using ContactsManager.Core.Enums;
 using ContactsManager.Web.Filters.Action;
 using ContactsManager.Web.Filters.Authorization;
-using ContactsManager.Web.Filters.Exception;
 using ContactsManager.Web.Filters.Resource;
 using ContactsManager.Web.Filters.Result;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using SerilogTimings;
 
 namespace ContactsManager.Web.Controllers;
 

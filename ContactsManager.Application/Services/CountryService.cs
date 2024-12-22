@@ -1,6 +1,6 @@
-using ContactsManager.Application.Interfaces;
+using ContactsManager.Application.ServiceInterfaces;
 using ContactsManager.Application.DTOs;
-using ContactsManager.Core.Interfaces;
+using ContactsManager.Application.RepositoryInterfaces;
 
 namespace ContactsManager.Application.Services;
 
