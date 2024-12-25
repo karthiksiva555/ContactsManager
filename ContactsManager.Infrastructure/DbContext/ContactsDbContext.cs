@@ -1,9 +1,11 @@
 using ContactsManager.Core.Entities;
+using ContactsManager.Core.Entities.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContactsManager.Infrastructure.DbContext;
 
-public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : Microsoft.EntityFrameworkCore.DbContext(options)
+public class ContactsDbContext(DbContextOptions<ContactsDbContext> options) : IdentityDbContext<User, Role, Guid>(options)
 {
     public virtual DbSet<Country> Countries { get; set; }
 
