@@ -1,9 +1,12 @@
 using ContactsManager.Application.ServiceInterfaces;
 using ContactsManager.Application.Services;
+using ContactsManager.Core.Entities.Identity;
 using ContactsManager.Infrastructure;
 using ContactsManager.Infrastructure.DbContext;
 using ContactsManager.Web.Filters.Action;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContactsManager.Web.Extensions;
@@ -37,6 +40,12 @@ public static class ConfigureServicesExtensions
 
         services.AddDbContext<ContactsDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnectionString")));
 
+        services.AddIdentity<User, Role>()
+            .AddEntityFrameworkStores<ContactsDbContext>()
+            .AddDefaultTokenProviders()
+            .AddUserStore<UserStore<User, Role, ContactsDbContext, Guid>>()
+            .AddRoleStore<RoleStore<Role, ContactsDbContext, Guid>>();
+        
         // To be able to call the filter with ServiceFilter instead of TypeFilter
         services.AddTransient<LogActionAsync>();
         services.AddTransient<AddHeaderActionFilter>();
